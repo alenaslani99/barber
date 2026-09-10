@@ -1,3 +1,6 @@
+using Barber.Api.Core;
+using Barber.DataAccess;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+builder.Services.AddDataAccess(
+    builder.Configuration.GetConnectionString("Catalog")
+        ?? throw new InvalidOperationException("Missing ConnectionStrings:Catalog."));
 
 var app = builder.Build();
 

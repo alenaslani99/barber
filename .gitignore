@@ -1,0 +1,25 @@
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+TestResults/
+
+# Node / Nuxt (web/)
+node_modules/
+dist/
+.output/
+nuxt/
+
+# Expo (mobile/)
+.expo/
+
+# Env / OS
+.env*
+.DS_Store
+Thumbs.db
+
+#AI
+.opencode/
+.opencode/

@@ -1,3 +1,4 @@
+using Barber.DataAccess.Configurations;
 using Barber.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,8 +21,9 @@ public sealed class TenantContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenantContext).Assembly);
-        modelBuilder.Ignore<Tenant>();
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(TenantContext).Assembly,
+            t => t != typeof(TenantConfiguration));
         base.OnModelCreating(modelBuilder);
     }
 }

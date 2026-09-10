@@ -1,6 +1,5 @@
 @Barber.Api_HostAddress = http://localhost:5118
 
-GET {{Barber.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
+GET https://localhost:7145/api/tenant
+X-Tenant-Slug: demo
 ###

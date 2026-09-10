@@ -1,3 +1,4 @@
+using Barber.DataAccess.Configurations;
 using Barber.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,15 +14,9 @@ public sealed class CatalogContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogContext).Assembly);
-        modelBuilder.Ignore<Barbershop>();
-        modelBuilder.Ignore<Service>();
-        modelBuilder.Ignore<Staff>();
-        modelBuilder.Ignore<Client>();
-        modelBuilder.Ignore<Booking>();
-        modelBuilder.Ignore<User>();
-        modelBuilder.Ignore<RefreshToken>();
-        modelBuilder.Ignore<Notification>();
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(CatalogContext).Assembly,
+            t => t == typeof(TenantConfiguration));
         base.OnModelCreating(modelBuilder);
     }
 }

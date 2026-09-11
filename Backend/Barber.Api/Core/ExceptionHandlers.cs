@@ -71,3 +71,18 @@ public sealed class RequestValidationExceptionHandler : IExceptionHandler
         return true;
     }
 }
+
+public sealed class NotFoundExceptionHandler : IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext httpContext, Exception exception, CancellationToken ct)
+    {
+        if (exception is not KeyNotFoundException)
+            return false;
+
+        httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+        await httpContext.Response.WriteAsJsonAsync(
+            new ProblemDetails { Title = exception.Message, Status = StatusCodes.Status404NotFound }, ct);
+        return true;
+    }
+}

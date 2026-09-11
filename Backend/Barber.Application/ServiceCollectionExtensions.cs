@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<LoginUserHandler>();
         services.AddScoped<RefreshSessionHandler>();
         services.AddScoped<LogoutUserHandler>();
+        services.AddScoped<CreateStaffHandler>();
         services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
         return services;
     }

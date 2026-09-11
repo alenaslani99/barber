@@ -47,6 +47,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddExceptionHandler<TenantNotFoundExceptionHandler>();
 builder.Services.AddExceptionHandler<AuthenticationExceptionHandler>();
 builder.Services.AddExceptionHandler<DuplicateEmailExceptionHandler>();
+builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
 builder.Services.AddExceptionHandler<RequestValidationExceptionHandler>();
 
 WebApplication app = builder.Build();

@@ -2,37 +2,46 @@
 
 GET https://localhost:7145/api/tenant
 X-Tenant-Slug: demo
-###
+
+### Register owner
 POST https://localhost:7145/api/auth/register
 X-Tenant-Slug: demo
 Content-Type: application/json
 
 {"email":"owner@demo.shop","password":"DemoPass123","firstName":"Demo","lastName":"Owner"}
 
-### Login
+### Register staff
+POST https://localhost:7145/api/auth/register
+X-Tenant-Slug: demo
+Content-Type: application/json
+
+{"email":"staff@demo.shop","password":"StaffPass123","firstName":"Staff","lastName":"Member"}
+
+### Login owner
 POST https://localhost:7145/api/auth/login
 X-Tenant-Slug: demo
 Content-Type: application/json
 
 {"email":"owner@demo.shop","password":"DemoPass123"}
 
-### Refresh (expect new pair, old one revoked)
+### Refresh
 POST https://localhost:7145/api/auth/refresh
 X-Tenant-Slug: demo
 Content-Type: application/json
 
-{"refreshToken":"kgWM0rdF0O4EnKYxRwjfsFhU24E+yIGoCTeZwVV0dIWWL1byN+4DABPbAIMCS5HykleFP2prl4Y5zLFNblM65A=="}
+{"refreshToken":"OHAMDL2jehtjF8qAa53Qq5V/oqjlu3+qHChBsV2GZnmJJK7a3BArRDIeK14XQ9VIWSCsh/jbOIQ/25b3uqJU2g=="}
 
-### Refresh again with the OLD token (expect 401 — rotation check)
-POST https://localhost:7145/api/auth/refresh
-X-Tenant-Slug: demo
-Content-Type: application/json
-
-{"refreshToken":"kgWM0rdF0O4EnKYxRwjfsFhU24E+yIGoCTeZwVV0dIWWL1byN+4DABPbAIMCS5HykleFP2prl4Y5zLFNblM65A=="}
-
-### Logout (expect 204, then refresh with it → 401)
+### Logout (expect 204)
 POST https://localhost:7145/api/auth/logout
 X-Tenant-Slug: demo
 Content-Type: application/json
 
-{"refreshToken":"nbmMmCRKWwruhBTRZWY5HpIm2/evQiZo/J1o03Rrmp9w8kHzbnCnmCIM1YgTJ9pGigBOfSPwnB9QGY8gZDKbPQ=="}
+{"refreshToken":"4fgqBvSaIkUUX7Yy8dTdtoqpEdZVqR2SVAfAT44UEj2eUCejwn/uKw+4xnA3N4Jlx5xBx0e1qWjaQJyM2fkuTg=="}
+
+### Create staff (Owner only)
+POST https://localhost:7145/api/staff
+X-Tenant-Slug: demo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMjRkN2FiYS0wZmYyLTRlMzgtODY2Mi05OWEwZDk5ZDU0OWYiLCJlbWFpbCI6Im93bmVyQGRlbW8uc2hvcCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6Ik93bmVyIiwidGVuYW50IjoiZGVtbyIsImV4cCI6MTc4OTE0NTk2NiwiaXNzIjoiYmFyYmVyLWFwaSIsImF1ZCI6ImJhcmJlci1jbGllbnRzIn0.ZH3LaacGL4he-aDr7Q1DJM5fl-QEs4mkDaPHfkbneKM
+Content-Type: application/json
+
+{"email":"staff@demo.shop","barbershopId":"73f1e611-9f30-48d2-8ce6-531610f6f676"}

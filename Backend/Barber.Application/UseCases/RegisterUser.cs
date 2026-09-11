@@ -1,0 +1,37 @@
+using Barber.Application.Auth;
+using Barber.Application.Exceptions;
+using Barber.DataAccess;
+using Barber.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+
+namespace Barber.Application.UseCases;
+
+public sealed record RegisterUserCommand(string Email, string Password, string FirstName, string LastName);
+
+public sealed class RegisterUserHandler(
+    TenantContext db,
+    IPasswordService passwords,
+    IJwtTokenService tokens,
+    IOptions<JwtSettings> settings,
+    ITenantProvider tenants)
+{
+    public async Task<AuthResult> HandleAsync(RegisterUserCommand command, CancellationToken ct = default)
+    {
+        if (await db.Users.AnyAsync(u => u.Email == command.Email, ct))
+            throw new DuplicateEmailException(command.Email);
+
+        User user = new() { Email = command.Email, PasswordHash = string.Empty, Role = UserRole.Client };
+        user.PasswordHash = passwords.HashPassword(user, command.Password);
+        db.Users.Add(user);
+        db.Clients.Add(new Client
+        {
+            FirstName = command.FirstName,
+            LastName = command.LastName,
+            Email = command.Email
+        });
+        await db.SaveChangesAsync(ct);
+
+        return await SessionIssuer.IssueAsync(db, tokens, settings.Value, user, tenants.GetSlug(), ct);
+    }
+}

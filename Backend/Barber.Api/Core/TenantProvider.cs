@@ -30,17 +30,26 @@ public sealed class TenantProvider : ITenantProvider
 
     public string GetConnectionString() => $"{_template};Database={GetTenant().DatabaseName}";
 
+    public string GetSlug()
+    {
+        string? slug = _http.HttpContext?.Request.Headers[HeaderName].ToString();
+        if (string.IsNullOrWhiteSpace(slug))
+            throw new TenantNotFoundException(slug ?? string.Empty);
+        return slug;
+    }
+
     private Tenant GetTenant()
     {
-        var slug = _http.HttpContext?.Request.Headers[HeaderName].ToString();
+        string? slug = _http.HttpContext?.Request.Headers[HeaderName].ToString();
         if (string.IsNullOrWhiteSpace(slug))
             throw new TenantNotFoundException(slug ?? string.Empty);
 
-        return _cache.GetOrCreate($"tenant:{slug}", entry =>
+        Tenant tenant = _cache.GetOrCreate($"tenant:{slug}", entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = CacheLifetime;
             return Load(slug);
         })!;
+        return tenant;
     }
 
     private Tenant Load(string slug) =>

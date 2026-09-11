@@ -23,6 +23,10 @@ Scope: backend API + databases only. No frontend, no mobile, no web.
 - Light command/query separation (not full CQRS): separate writes from reads at handler/folder level, sharing one EF model and one Postgres schema per tenant. Keep handlers small, one intent per handler. No separate read/write stores, no events, no event sourcing unless a proven hotspot requires it. This domain is mostly simple CRUD, so full CQRS would slow solo velocity.
 - SOLID: apply where it helps readability and testability. Do NOT follow SOLID 100% if it damages the code (e.g. no speculative interfaces, no one-method classes, no deep inheritance). Prefer composition and explicit code over clever abstractions.
 
+## C# Style
+
+- Use explicit types everywhere, never `var`.
+
 ## API Rules
 
 - Use the `dotnet-webapi` skill when adding endpoints: correct HTTP semantics, OpenAPI metadata, global error-handling middleware.

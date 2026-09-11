@@ -7,7 +7,7 @@ public sealed class TenantContextFactory : IDesignTimeDbContextFactory<TenantCon
 {
     public TenantContext CreateDbContext(string[] args)
     {
-        var options = new DbContextOptionsBuilder<TenantContext>()
+        DbContextOptions<TenantContext> options = new DbContextOptionsBuilder<TenantContext>()
             .UseNpgsql("Host=localhost;Port=5432;Database=barber_t_design;Username=postgres;Password=postgres")
             .Options;
         return new TenantContext(options);

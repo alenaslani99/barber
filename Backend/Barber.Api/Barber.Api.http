@@ -3,3 +3,36 @@
 GET https://localhost:7145/api/tenant
 X-Tenant-Slug: demo
 ###
+POST https://localhost:7145/api/auth/register
+X-Tenant-Slug: demo
+Content-Type: application/json
+
+{"email":"owner@demo.shop","password":"DemoPass123","firstName":"Demo","lastName":"Owner"}
+
+### Login
+POST https://localhost:7145/api/auth/login
+X-Tenant-Slug: demo
+Content-Type: application/json
+
+{"email":"owner@demo.shop","password":"DemoPass123"}
+
+### Refresh (expect new pair, old one revoked)
+POST https://localhost:7145/api/auth/refresh
+X-Tenant-Slug: demo
+Content-Type: application/json
+
+{"refreshToken":"kgWM0rdF0O4EnKYxRwjfsFhU24E+yIGoCTeZwVV0dIWWL1byN+4DABPbAIMCS5HykleFP2prl4Y5zLFNblM65A=="}
+
+### Refresh again with the OLD token (expect 401 — rotation check)
+POST https://localhost:7145/api/auth/refresh
+X-Tenant-Slug: demo
+Content-Type: application/json
+
+{"refreshToken":"kgWM0rdF0O4EnKYxRwjfsFhU24E+yIGoCTeZwVV0dIWWL1byN+4DABPbAIMCS5HykleFP2prl4Y5zLFNblM65A=="}
+
+### Logout (expect 204, then refresh with it → 401)
+POST https://localhost:7145/api/auth/logout
+X-Tenant-Slug: demo
+Content-Type: application/json
+
+{"refreshToken":"nbmMmCRKWwruhBTRZWY5HpIm2/evQiZo/J1o03Rrmp9w8kHzbnCnmCIM1YgTJ9pGigBOfSPwnB9QGY8gZDKbPQ=="}

@@ -15,8 +15,8 @@ public sealed class TenantController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken ct)
     {
-        var database = _db.Database.GetDbConnection().Database;
-        var barbershops = await _db.Barbershops.CountAsync(ct);
+        string database = _db.Database.GetDbConnection().Database;
+        int barbershops = await _db.Barbershops.CountAsync(ct);
         return Ok(new { database, barbershops });
     }
 }

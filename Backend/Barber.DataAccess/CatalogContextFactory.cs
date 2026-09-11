@@ -7,7 +7,7 @@ public sealed class CatalogContextFactory : IDesignTimeDbContextFactory<CatalogC
 {
     public CatalogContext CreateDbContext(string[] args)
     {
-        var options = new DbContextOptionsBuilder<CatalogContext>()
+        DbContextOptions<CatalogContext> options = new DbContextOptionsBuilder<CatalogContext>()
             .UseNpgsql("Host=localhost;Port=5432;Database=barber_catalog;Username=postgres;Password=postgres")
             .Options;
         return new CatalogContext(options);

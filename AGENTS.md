@@ -5,7 +5,7 @@ Multi-tenant barber booking SaaS (one backend, one database per client).
 ## Layout
 
 - `Backend/` — .NET 10 Web API. Conventions: `Backend/AGENTS.md`.
-- `web/` — Nuxt web client (later). Conventions: `web/AGENTS.md` once created.
+- `web/` — Vue 3 + Vite SPA client. Conventions: `web/AGENTS.md`.
 - `mobile/` — Expo mobile client (later).
 - `db/` — local Postgres compose + init notes. EF migrations in `Backend/` stay the source of truth.
 

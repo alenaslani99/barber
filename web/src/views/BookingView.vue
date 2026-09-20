@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { barbers, getNextDays, getSlots, services } from '../data/mock';
 import BookingStepper from '../components/features/booking/BookingStepper.vue';
 import ShopHeader from '../components/layout/ShopHeader.vue';
@@ -8,6 +9,21 @@ import ServiceOption from '../components/features/booking/ServiceOption.vue';
 import DateStrip from '../components/features/booking/DateStrip.vue';
 import TimeGrid from '../components/features/booking/TimeGrid.vue';
 import BookingSummary from '../components/features/booking/BookingSummary.vue';
+import { useAuthStore } from '../stores/auth';
+
+interface BookingDraft {
+  barberId: string | null;
+  serviceId: string | null;
+  dateIso: string | null;
+  time: string | null;
+  notes: string;
+  step: number;
+}
+
+const DRAFT_KEY = 'barber.booking.draft';
+
+const auth = useAuthStore();
+const router = useRouter();
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -91,6 +107,20 @@ function goTo(s: number): void {
 }
 
 function reserve(): void {
+  if (!auth.isAuthenticated) {
+    const draft: BookingDraft = {
+      barberId: barberId.value,
+      serviceId: serviceId.value,
+      dateIso: dateIso.value,
+      time: time.value,
+      notes: notes.value,
+      step: step.value,
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    void router.push({ path: '/login', query: { next: '/' } });
+    return;
+  }
+  localStorage.removeItem(DRAFT_KEY);
   const code = Math.random().toString(36).slice(2, 8).toUpperCase();
   bookingRef.value = `BK-${code}`;
   booked.value = true;
@@ -106,8 +136,26 @@ function reset(): void {
   notes.value = '';
   booked.value = false;
   bookingRef.value = '';
+  localStorage.removeItem(DRAFT_KEY);
   scrollTop();
 }
+
+onMounted(() => {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return;
+    const draft = JSON.parse(raw) as BookingDraft;
+    barberId.value = draft.barberId;
+    serviceId.value = draft.serviceId;
+    dateIso.value = draft.dateIso;
+    time.value = draft.time;
+    notes.value = draft.notes;
+    if (draft.step >= 1 && draft.step <= 4) step.value = draft.step as Step;
+    localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    localStorage.removeItem(DRAFT_KEY);
+  }
+});
 </script>
 
 <template>

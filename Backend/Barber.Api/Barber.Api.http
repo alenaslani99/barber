@@ -24,19 +24,13 @@ Content-Type: application/json
 
 {"email":"owner@demo.shop","password":"DemoPass123"}
 
-### Refresh
+### Refresh (uses the refresh cookie, no body)
 POST https://localhost:7145/api/auth/refresh
 X-Tenant-Slug: demo
-Content-Type: application/json
 
-{"refreshToken":"OHAMDL2jehtjF8qAa53Qq5V/oqjlu3+qHChBsV2GZnmJJK7a3BArRDIeK14XQ9VIWSCsh/jbOIQ/25b3uqJU2g=="}
-
-### Logout (expect 204)
+### Logout (expect 204, uses the refresh cookie, no body)
 POST https://localhost:7145/api/auth/logout
 X-Tenant-Slug: demo
-Content-Type: application/json
-
-{"refreshToken":"4fgqBvSaIkUUX7Yy8dTdtoqpEdZVqR2SVAfAT44UEj2eUCejwn/uKw+4xnA3N4Jlx5xBx0e1qWjaQJyM2fkuTg=="}
 
 ### Create staff (Owner only)
 POST https://localhost:7145/api/staff

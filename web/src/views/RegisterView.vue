@@ -3,14 +3,17 @@ import { ref, useTemplateRef } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import AuthLayout from '../components/layout/AuthLayout.vue';
 import UiInput from '../components/ui/UiInput.vue';
+import { ApiRequestError } from '../lib/api';
+import { useAuthStore } from '../stores/auth';
 
-type Validator = { validate: () => boolean };
+type Validator = { validate: () => boolean; setError: (message: string) => void };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+\d][\d\s/().-]{5,}$/;
 
 const router = useRouter();
 const route = useRoute();
+const auth = useAuthStore();
 
 const firstName = ref('');
 const lastName = ref('');
@@ -18,6 +21,8 @@ const email = ref('');
 const phone = ref('');
 const password = ref('');
 const confirm = ref('');
+const loading = ref(false);
+const formError = ref('');
 
 const firstNameInput = useTemplateRef<Validator>('firstNameInput');
 const lastNameInput = useTemplateRef<Validator>('lastNameInput');
@@ -45,7 +50,22 @@ const confirmRules = [
   (v: string) => (v !== password.value ? 'LOZINKE SE NE POKLAPAJU' : ''),
 ];
 
-function submit(): void {
+function applyFieldErrors(errors: Record<string, string[]>): void {
+  const leftovers: string[] = [];
+  for (const key of Object.keys(errors)) {
+    const message = errors[key]?.[0] ?? 'NEISPRAVAN UNOS';
+    if (key === 'Email') emailInput.value?.setError(message);
+    else if (key === 'Phone') phoneInput.value?.setError(message);
+    else if (key === 'Password') passwordInput.value?.setError(message);
+    else if (key === 'FirstName') firstNameInput.value?.setError(message);
+    else if (key === 'LastName') lastNameInput.value?.setError(message);
+    else leftovers.push(message);
+  }
+  if (leftovers.length > 0) formError.value = leftovers.join(' / ');
+}
+
+async function submit(): Promise<void> {
+  formError.value = '';
   const results = [
     firstNameInput.value?.validate() ?? false,
     lastNameInput.value?.validate() ?? false,
@@ -55,8 +75,35 @@ function submit(): void {
     confirmInput.value?.validate() ?? false,
   ];
   if (results.includes(false)) return;
-  const next = typeof route.query.next === 'string' ? route.query.next : '/';
-  void router.push(next);
+  loading.value = true;
+  try {
+    await auth.register({
+      firstName: firstName.value,
+      lastName: lastName.value,
+      email: email.value,
+      phone: phone.value,
+      password: password.value,
+    });
+    const next = typeof route.query.next === 'string' ? route.query.next : '/';
+    await router.push(next);
+  } catch (error) {
+    if (error instanceof ApiRequestError) {
+      if (error.status === 409) {
+        const title = error.title.toLowerCase();
+        if (title.includes('email')) emailInput.value?.setError('EMAIL JE ZAUZET');
+        else if (title.includes('phone')) phoneInput.value?.setError('TELEFON JE ZAUZET');
+        else formError.value = 'NALOG VEĆ POSTOJI';
+        return;
+      }
+      if (error.status === 400) {
+        applyFieldErrors(error.errors);
+        return;
+      }
+    }
+    formError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
@@ -134,11 +181,19 @@ function submit(): void {
             :rules="confirmRules"
           />
         </div>
+        <p
+          v-if="formError"
+          role="alert"
+          class="mt-4 border border-alarm p-3 text-center text-lg tracking-widest text-alarm"
+        >
+          {{ formError }}
+        </p>
         <button
           type="submit"
-          class="mt-6 w-full bg-blaze py-3 text-2xl tracking-widest text-ink hover:opacity-90"
+          :disabled="loading"
+          class="mt-6 w-full bg-blaze py-3 text-2xl tracking-widest text-ink hover:opacity-90 disabled:opacity-40"
         >
-          REGISTRUJ SE
+          {{ loading ? 'UČITAVANJE...' : 'REGISTRUJ SE' }}
         </button>
       </form>
     </template>

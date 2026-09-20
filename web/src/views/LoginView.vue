@@ -4,19 +4,26 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import AuthLayout from '../components/layout/AuthLayout.vue';
 import UiCheckbox from '../components/ui/UiCheckbox.vue';
 import UiInput from '../components/ui/UiInput.vue';
+import { ApiRequestError } from '../lib/api';
+import { useAuthStore } from '../stores/auth';
+
+type Validator = { validate: () => boolean; setError: (message: string) => void };
 
 const REMEMBER_KEY = 'barber.remember.email';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const router = useRouter();
 const route = useRoute();
+const auth = useAuthStore();
 
 const email = ref('');
 const password = ref('');
 const remember = ref(false);
+const loading = ref(false);
+const formError = ref('');
 
-const emailInput = useTemplateRef<{ validate: () => boolean }>('emailInput');
-const passwordInput = useTemplateRef<{ validate: () => boolean }>('passwordInput');
+const emailInput = useTemplateRef<Validator>('emailInput');
+const passwordInput = useTemplateRef<Validator>('passwordInput');
 
 const emailRules = [
   (v: string) => (!v ? 'EMAIL JE OBAVEZAN' : ''),
@@ -35,14 +42,27 @@ onMounted(() => {
   }
 });
 
-function submit(): void {
+async function submit(): Promise<void> {
+  formError.value = '';
   const emailOk = emailInput.value?.validate() ?? false;
   const passOk = passwordInput.value?.validate() ?? false;
   if (!emailOk || !passOk) return;
-  if (remember.value) localStorage.setItem(REMEMBER_KEY, email.value);
-  else localStorage.removeItem(REMEMBER_KEY);
-  const next = typeof route.query.next === 'string' ? route.query.next : '/';
-  void router.push(next);
+  loading.value = true;
+  try {
+    await auth.login(email.value, password.value);
+    if (remember.value) localStorage.setItem(REMEMBER_KEY, email.value);
+    else localStorage.removeItem(REMEMBER_KEY);
+    const next = typeof route.query.next === 'string' ? route.query.next : '/';
+    await router.push(next);
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 401) {
+      formError.value = 'POGREŠAN EMAIL ILI LOZINKA';
+    } else {
+      formError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
+    }
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
@@ -75,11 +95,19 @@ function submit(): void {
         <div class="mt-4">
           <UiCheckbox v-model="remember" label="ZAPAMTI ME" />
         </div>
+        <p
+          v-if="formError"
+          role="alert"
+          class="mt-4 border border-alarm p-3 text-center text-lg tracking-widest text-alarm"
+        >
+          {{ formError }}
+        </p>
         <button
           type="submit"
-          class="mt-6 w-full bg-blaze py-3 text-2xl tracking-widest text-ink hover:opacity-90"
+          :disabled="loading"
+          class="mt-6 w-full bg-blaze py-3 text-2xl tracking-widest text-ink hover:opacity-90 disabled:opacity-40"
         >
-          PRIJAVI SE
+          {{ loading ? 'UČITAVANJE...' : 'PRIJAVI SE' }}
         </button>
       </form>
     </template>

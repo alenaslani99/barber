@@ -36,7 +36,11 @@ function validate(): boolean {
   return true;
 }
 
-defineExpose({ validate });
+function setError(message: string): void {
+  error.value = message;
+}
+
+defineExpose({ validate, setError });
 </script>
 
 <template>

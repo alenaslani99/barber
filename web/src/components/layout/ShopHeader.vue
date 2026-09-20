@@ -4,7 +4,9 @@ import { ChevronDown, ChevronUp, User } from '@lucide/vue';
 import { RouterLink } from 'vue-router';
 import { shop } from '../../data/mock';
 import { cn } from '../../utils/cn';
+import { useAuthStore } from '../../stores/auth';
 
+const auth = useAuthStore();
 const hoursOpen = ref(false);
 
 const todaySummary = computed(() => {
@@ -20,6 +22,16 @@ const todaySummary = computed(() => {
       <div class="flex items-center justify-between py-3">
         <p class="text-lg tracking-widest text-ash">{{ shop.tagline }}</p>
         <RouterLink
+          v-if="auth.isAuthenticated"
+          to="/account"
+          class="flex items-center gap-2 border border-blaze px-4 py-1 text-lg tracking-widest text-blaze hover:bg-blaze hover:text-ink"
+          aria-label="Nalog"
+        >
+          <User class="h-4 w-4" aria-hidden="true" />
+          {{ auth.displayName }}
+        </RouterLink>
+        <RouterLink
+          v-else
           to="/login"
           class="flex items-center gap-2 border border-blaze px-4 py-1 text-lg tracking-widest text-blaze hover:bg-blaze hover:text-ink"
           aria-label="Prijava"

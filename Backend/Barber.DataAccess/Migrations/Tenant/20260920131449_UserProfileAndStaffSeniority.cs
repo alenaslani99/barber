@@ -81,7 +81,7 @@ namespace Barber.DataAccess.Migrations.Tenant
                 table: "Staff",
                 type: "uuid",
                 nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                defaultValue: new Guid("22222222-2222-2222-2222-222222222222"));
 
             migrationBuilder.CreateTable(
                 name: "Seniorities",

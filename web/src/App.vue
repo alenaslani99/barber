@@ -1,7 +1,7 @@
 <script setup lang="ts">
-
+import { RouterView } from 'vue-router';
 </script>
 
 <template>
-  <h1 class="text-3xl">Idemo sine</h1>
+  <RouterView />
 </template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cn } from '../../utils/cn';
 
-type ButtonVariant = 'primary' | 'accent' | 'ghost';
+type ButtonVariant = 'primary' | 'ghost';
 
 interface Props {
   variant?: ButtonVariant;
@@ -18,9 +18,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white',
-  accent: 'bg-accent text-white',
-  ghost: 'border border-black/8 bg-white text-text',
+  primary: 'bg-accent text-black',
+  ghost: 'border border-white/10 bg-transparent text-text',
 };
 </script>
 

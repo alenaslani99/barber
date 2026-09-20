@@ -11,26 +11,26 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-  <ol aria-label="Booking progress" class="flex items-center gap-2">
+  <ol aria-label="Booking progress" class="grid grid-cols-5 gap-2">
     <li
       v-for="(step, index) in props.steps"
       :key="step.key"
       :aria-current="index === props.currentIndex ? 'step' : undefined"
-      class="flex flex-1 items-center gap-2 last:flex-none"
+      class="min-w-0"
     >
       <span
         :class="
           cn(
-            'h-1.5 flex-1 rounded-full',
-            index < props.currentIndex ? 'bg-primary' : index === props.currentIndex ? 'bg-accent' : 'bg-black/10',
+            'block h-2 rounded-full',
+            index <= props.currentIndex ? 'bg-accent' : 'bg-white/10',
           )
         "
       />
       <span
         :class="
           cn(
-            'hidden text-xs font-semibold sm:inline',
-            index === props.currentIndex ? 'text-text' : 'text-text/50',
+            'mt-2 block truncate text-[11px] font-semibold sm:text-xs',
+            index === props.currentIndex ? 'text-accent' : index < props.currentIndex ? 'text-text' : 'text-muted',
           )
         "
       >

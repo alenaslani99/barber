@@ -12,4 +12,4 @@ Multi-tenant barber booking SaaS (one backend, one database per client).
 ## Git Rules
 
 - NEVER `git commit`, `git push`, or otherwise write git history. Only propose the commit message plus the exact file list — the user executes.
-- Commit messages: subject line only (`type: summary`, e.g. `feat: add booking availability query`), no body, no footer, unless explicitly asked.
+- Commit messages: subject line only (`type(scope): summary`, e.g. `feat(web): add booking availability query`), no body, no footer, unless explicitly asked. Scopes: `backend`, `web`, `mobile`, `db`.

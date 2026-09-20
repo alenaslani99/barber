@@ -21,6 +21,9 @@ public sealed class RegisterUserHandler(
         if (await db.Users.AnyAsync(u => u.Email == command.Email, ct))
             throw new DuplicateEmailException(command.Email);
 
+        if (await db.Users.AnyAsync(u => u.Phone == command.Phone, ct))
+            throw new DuplicatePhoneException(command.Phone);
+
         User user = new()
         {
             FirstName = command.FirstName,

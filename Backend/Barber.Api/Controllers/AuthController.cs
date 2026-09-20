@@ -21,7 +21,7 @@ public sealed class AuthController(
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request, CancellationToken ct)
     {
-        RegisterUserCommand command = new(request.Email, request.Password, request.FirstName, request.LastName);
+        RegisterUserCommand command = new(request.Email, request.Password, request.FirstName, request.LastName, request.Phone);
         await registerValidator.ValidateAndThrowAsync(command, ct);
         AuthResult result = await register.HandleAsync(command, ct);
         return Ok(ToResponse(result));

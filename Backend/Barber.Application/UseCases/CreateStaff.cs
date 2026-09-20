@@ -1,10 +1,11 @@
 using Barber.DataAccess;
+using Barber.DataAccess.Configurations;
 using Barber.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace Barber.Application.UseCases;
 
-public sealed record CreateStaffCommand(string Email, Guid BarbershopId);
+public sealed record CreateStaffCommand(string Email, Guid BarbershopId, Guid? SeniorityId);
 
 public sealed class CreateStaffHandler(TenantContext db)
 {
@@ -30,13 +31,16 @@ public sealed class CreateStaffHandler(TenantContext db)
             return existing;
         }
 
-        Client? client = await db.Clients.FirstOrDefaultAsync(c => c.Email == command.Email, ct);
+        Guid seniorityId = command.SeniorityId ?? SeniorityConfiguration.BarberId;
+        bool seniorityExists = await db.Seniorities.AnyAsync(s => s.Id == seniorityId, ct);
+        if (!seniorityExists)
+            throw new KeyNotFoundException($"Seniority '{seniorityId}' not found.");
+
         Staff staff = new()
         {
             BarbershopId = command.BarbershopId,
             UserId = user.Id,
-            FirstName = client?.FirstName ?? command.Email,
-            LastName = client?.LastName ?? string.Empty
+            SeniorityId = seniorityId
         };
         user.Role = UserRole.Barber;
         db.Staff.Add(staff);

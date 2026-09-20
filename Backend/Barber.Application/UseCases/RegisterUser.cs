@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Barber.Application.UseCases;
 
-public sealed record RegisterUserCommand(string Email, string Password, string FirstName, string LastName);
+public sealed record RegisterUserCommand(string Email, string Password, string FirstName, string LastName, string Phone);
 
 public sealed class RegisterUserHandler(
     TenantContext db,
@@ -21,15 +21,17 @@ public sealed class RegisterUserHandler(
         if (await db.Users.AnyAsync(u => u.Email == command.Email, ct))
             throw new DuplicateEmailException(command.Email);
 
-        User user = new() { Email = command.Email, PasswordHash = string.Empty, Role = UserRole.Client };
-        user.PasswordHash = passwords.HashPassword(user, command.Password);
-        db.Users.Add(user);
-        db.Clients.Add(new Client
+        User user = new()
         {
             FirstName = command.FirstName,
             LastName = command.LastName,
-            Email = command.Email
-        });
+            Email = command.Email,
+            Phone = command.Phone,
+            PasswordHash = string.Empty,
+            Role = UserRole.Client
+        };
+        user.PasswordHash = passwords.HashPassword(user, command.Password);
+        db.Users.Add(user);
         await db.SaveChangesAsync(ct);
 
         return await SessionIssuer.IssueAsync(db, tokens, settings.Value, user, tenants.GetSlug(), ct);

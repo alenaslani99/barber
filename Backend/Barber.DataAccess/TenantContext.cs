@@ -13,7 +13,7 @@ public sealed class TenantContext : DbContext
     public DbSet<Barbershop> Barbershops => Set<Barbershop>();
     public DbSet<Service> Services => Set<Service>();
     public DbSet<Staff> Staff => Set<Staff>();
-    public DbSet<Client> Clients => Set<Client>();
+    public DbSet<Seniority> Seniorities => Set<Seniority>();
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();

@@ -17,9 +17,9 @@ public sealed class StaffController(
     [HttpPost]
     public async Task<ActionResult<StaffResponse>> Create(CreateStaffRequest request, CancellationToken ct)
     {
-        CreateStaffCommand command = new(request.Email, request.BarbershopId);
+        CreateStaffCommand command = new(request.Email, request.BarbershopId, request.SeniorityId);
         await validator.ValidateAndThrowAsync(command, ct);
         Staff staff = await create.HandleAsync(command, ct);
-        return Ok(new StaffResponse(staff.Id, staff.UserId, staff.FirstName, staff.LastName));
+        return Ok(new StaffResponse(staff.Id, staff.UserId, staff.BarbershopId, staff.SeniorityId, staff.IsActive));
     }
 }

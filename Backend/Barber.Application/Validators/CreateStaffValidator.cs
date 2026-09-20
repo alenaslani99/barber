@@ -9,5 +9,6 @@ public sealed class CreateStaffValidator : AbstractValidator<CreateStaffCommand>
     {
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(256);
         RuleFor(x => x.BarbershopId).NotEmpty();
+        RuleFor(x => x.SeniorityId).NotEmpty().When(x => x.SeniorityId.HasValue);
     }
 }

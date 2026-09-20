@@ -11,45 +11,33 @@ Scope: `web/` SPA only. No backend, no mobile.
 
 All values via CSS variables in `src/styles/tokens.css` (Tailwind `@theme`). Never hardcode hex/spacing outside tokens.
 
-### Brand palette
+### Brand palette (dark-first)
 
-- `primary: #2b2a26` — CTAs, headings emphasis, links
-- `accent: #e69b00` — highlights, success/warning/danger tinted variants
-- `neutral: #f0e6dd` — warm background base, card surfaces
-- `text: #1a1a1a` — body text (4.5:1 contrast on neutral)
-- Default palette as above. Clients may choose 3–4 complementary palettes that pair with this base — switch via CSS variable override without layout changes.
+- `ink: #0a0a0a` — page background
+- `surface: #141412` — cards, raised elements
+- `volt: #e8f000` — THE accent: primary CTAs, active/selected states, key data only
+- `bone: #f5f5f0` — primary text
+- `ash: #8b8b84` — secondary text, labels
+- `line: #262622` — hairline borders
+- Usage: Tailwind theme tokens (`bg-ink`, `text-bone`, `bg-volt`, `border-line`, `text-ash`, `bg-surface`). One volt pill action per screen max — restraint is the brand.
 
 ### Typography
 
-- `font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif`
-- Scale (base 16px): `Display1 48px / Display2 40px / Heading1 32px / Heading2 28px / Heading3 22px / Body 16px / Small 12px`
-- `line-height: 1.15` for Display/Headings, `1.5` for Body/Small
-- `font-weight: 700` headings, `400–600` body (contextual)
-- `letter-spacing: -0.02em` headings, `normal` body
+- Display: `"Archivo Black"` — `font-display`, UPPERCASE, `tracking-squeeze` (-0.03em). Headlines, prices, the pill button.
+- Body/UI: `"Archivo"` 400–700 — `font-body`. Names, labels, form text.
+- Data/utility: `"JetBrains Mono"` — `font-mono`, uppercase + `tracking-widest` for labels; plain for times, durations, ticket codes.
+- Self-hosted `.woff2` in `public/fonts/` (declared in `tokens.css`). Same files reusable by the Expo app.
 
 ### Spacing (4px base)
 
 - Unit `4px`. Multiples: `1u 4px / 2u 8px / 3u 12px / 4u 16px / 5u 20px / 6u 24px / 8u 32px / 10u 40px`
-- Container paddings: `8–24px` small screens, `24–64px` large screens
-- Gaps: use `4 / 8 / 12 / 16 / 24 / 32px` only
+- Layout: mobile-first single column, centered `max-w-md` on all breakpoints (parity with the future Expo app). No wide desktop layout.
 
 ### Border / Radius / Shadow
 
-- Border: `1px solid rgba(0,0,0,0.08)` cards
-- Radius: `6px` default, `8px` large surfaces, `4px` small components
-- Shadow presets: `subtle 0 1px 3px rgba(0,0,0,0.08) / medium 0 4px 12px rgba(0,0,0,0.12) / strong 0 8px 20px rgba(0,0,0,0.15)`
-
-### Color usage
-
-- Background: neutral or light variants
-- Links: primary or accent
-- States: accent-tinted variants (never introduce outside-palette hues)
-
-### Example token usage
-
-- Button primary: `background: var(--color-primary); color: white; border-radius: var(--radius-default); padding: 10px 14px`
-- Card: `background: white; border: var(--border-card); border-radius: var(--radius-lg); padding: var(--space-4); box-shadow: var(--shadow-subtle)`
-- Heading: `font-size: var(--text-h1); line-height: var(--leading-tight)`
+- Border: `1px solid var(--color-line)` on cards/inputs
+- Radius: `rounded-full` (999px) pills for ALL primary actions + selectable chips; `rounded-2xl` cards; `rounded-lg` inputs
+- No shadows. Depth comes from `surface` vs `ink` and hairline borders.
 
 ## Tailwind / Styling Rules
 
@@ -75,7 +63,7 @@ All values via CSS variables in `src/styles/tokens.css` (Tailwind `@theme`). Nev
 
 - Semantic HTML, `aria-label` where appropriate, keyboard navigable.
 - Contrast `>= 4.5:1` body text on backgrounds.
-- Warm neutral base, bold contrasted CTAs.
+- Dark `ink` base, `bone` text (contrast ≥ 4.5:1), volt reserved for CTAs/active states.
 
 ## Client Palette Switching
 

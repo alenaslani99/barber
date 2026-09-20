@@ -11,7 +11,9 @@ export interface ShopInfo {
   tagline: string;
   description: string;
   address: string;
+  addressHref: string;
   phone: string;
+  phoneHref: string;
   hours: DayHours[];
 }
 
@@ -49,7 +51,9 @@ export const shop: ShopInfo = {
   tagline: 'OD 2016. - FRANKFURT NA MAJNI',
   description: 'OŠTRE FRIZURE. BEZ GALAME.',
   address: 'KAISERSTRASSE 12, 60311 FRANKFURT',
+  addressHref: 'https://www.google.com/maps/search/?api=1&query=KAISERSTRASSE+12+60311+FRANKFURT',
   phone: '+49 69 00 00 00',
+  phoneHref: 'tel:+4969000000',
   hours: [
     { day: 'PONEDELJAK', short: 'PON', open: '09:00', close: '20:00', closed: false },
     { day: 'UTORAK', short: 'UTO', open: '09:00', close: '20:00', closed: false },

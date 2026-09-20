@@ -113,7 +113,7 @@ function reset(): void {
 <template>
   <ShopHeader />
   <main class="bg-ink text-bone">
-    <div class="mx-auto mt-16 w-full px-4 pb-32 lg:w-1/2">
+    <div class="mx-auto mt-16 w-full px-4 pb-8 lg:w-1/2">
       <div v-if="booked">
         <h2 class="mt-8 font-display text-7xl leading-none tracking-wide">ZAKAZANO</h2>
         <p class="mt-2 text-xl tracking-widest text-ash">POKAŽI OVAJ KOD U SALONU</p>
@@ -232,9 +232,9 @@ function reset(): void {
 
     <div
       v-if="!booked && step < 4"
-      class="fixed inset-x-0 bottom-0 border-t border-line bg-ink"
+      class="sticky bottom-0 mx-auto w-full border-t border-line bg-ink lg:w-1/2"
     >
-      <div class="mx-auto flex w-full items-center justify-between gap-3 px-4 py-3 lg:w-1/2">
+      <div class="flex items-center justify-between gap-3 px-4 py-3">
         <p class="truncate text-lg tracking-widest text-ash">{{ recap || 'ZAKAŽI ŠIŠANJE' }}</p>
         <div class="flex shrink-0 gap-2">
           <button

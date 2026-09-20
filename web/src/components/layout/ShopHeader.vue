@@ -72,8 +72,17 @@ const todaySummary = computed(() => {
       </div>
 
       <div class="flex items-center justify-between gap-4 py-3">
-        <p class="text-lg tracking-widest text-ash">{{ shop.address }}</p>
-        <p class="text-lg tracking-widest text-bone">{{ shop.phone }}</p>
+        <a
+          :href="shop.addressHref"
+          target="_blank"
+          rel="noopener"
+          class="text-lg tracking-widest text-ash hover:text-bone"
+        >
+          {{ shop.address }}
+        </a>
+        <a :href="shop.phoneHref" class="text-lg tracking-widest text-bone hover:text-blaze">
+          {{ shop.phone }}
+        </a>
       </div>
     </div>
   </header>

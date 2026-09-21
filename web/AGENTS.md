@@ -25,6 +25,7 @@ All values via CSS variables in `src/styles/tokens.css` (Tailwind `@theme`). Nev
 ### Typography (Bebas everywhere)
 
 - All text uses `"Bebas Neue"` (`font-display`, also set as `font-sans` base) — self-hosted in `public/fonts/BebasNeue-Regular.woff2` (+ `.woff` fallback), declared in `tokens.css`.
+- Form inputs only use `"Inter"` (`font-form`, tracking normal, case as typed) — self-hosted `public/fonts/Inter-Regular.woff2` (full charset incl. latin-ext for `šđžćč`).
 - No mono font. Times, dates, codes, labels all in Bebas.
 - Style: UPPERCASE everywhere, letter-spacing `0.04em`–`0.08em` for readability. Body base size `18px`+ since Bebas runs narrow.
 - Scale: shop name huge (display), prices/section titles large, labels smaller + `text-ash`.

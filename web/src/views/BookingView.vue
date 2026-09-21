@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { barbers, getNextDays, getSlots, services } from '../data/mock';
+import { api, ApiRequestError } from '../lib/api';
+import { getNextDays, getSlots } from '../data/mock';
+import {
+  fetchBarbers,
+  fetchServices,
+  type ApiBarber,
+  type ApiService,
+} from '../lib/catalog';
 import BookingStepper from '../components/features/booking/BookingStepper.vue';
 import ShopHeader from '../components/layout/ShopHeader.vue';
 import BarberOption from '../components/features/booking/BarberOption.vue';
@@ -35,12 +42,32 @@ const time = ref<string | null>(null);
 const notes = ref('');
 const booked = ref(false);
 const bookingRef = ref('');
+const reserveLoading = ref(false);
+const reserveError = ref('');
+const barbers = ref<ApiBarber[]>([]);
+const services = ref<ApiService[]>([]);
+const catalogLoading = ref(true);
+const catalogError = ref('');
+
+async function loadCatalog(): Promise<void> {
+  catalogLoading.value = true;
+  catalogError.value = '';
+  try {
+    const [b, s] = await Promise.all([fetchBarbers(), fetchServices()]);
+    barbers.value = b;
+    services.value = s;
+  } catch {
+    catalogError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
+  } finally {
+    catalogLoading.value = false;
+  }
+}
 
 const days = getNextDays(14);
 
-const selectedBarber = computed(() => barbers.find((b) => b.id === barberId.value) ?? null);
+const selectedBarber = computed(() => barbers.value.find((b) => b.id === barberId.value) ?? null);
 const selectedService = computed(
-  () => services.find((s) => s.id === serviceId.value) ?? null,
+  () => services.value.find((s) => s.id === serviceId.value) ?? null,
 );
 const slots = computed(() => (dateIso.value ? getSlots(dateIso.value, barberId.value) : []));
 const dateLabel = computed(() => {
@@ -57,7 +84,7 @@ const canContinue = computed(() => {
 
 const recap = computed(() => {
   const parts: string[] = [];
-  if (selectedBarber.value) parts.push(selectedBarber.value.name);
+  if (selectedBarber.value) parts.push(`${selectedBarber.value.firstName} ${selectedBarber.value.lastName}`);
   if (selectedService.value) parts.push(selectedService.value.name);
   if (dateLabel.value && time.value) parts.push(`${dateLabel.value} ${time.value}`);
   else if (dateLabel.value) parts.push(dateLabel.value);
@@ -106,7 +133,15 @@ function goTo(s: number): void {
   if (s >= 1 && s <= 4 && s < step.value) step.value = s as Step;
 }
 
-function reserve(): void {
+function buildStartsAt(): string | null {
+  if (!dateIso.value || !time.value) return null;
+  const [y, m, d] = dateIso.value.split('-').map(Number);
+  const [hh, mm] = time.value.split(':').map(Number);
+  return new Date(y, m - 1, d, hh, mm).toISOString();
+}
+
+async function reserve(): Promise<void> {
+  reserveError.value = '';
   if (!auth.isAuthenticated) {
     const draft: BookingDraft = {
       barberId: barberId.value,
@@ -120,11 +155,38 @@ function reserve(): void {
     void router.push({ path: '/login', query: { next: '/' } });
     return;
   }
-  localStorage.removeItem(DRAFT_KEY);
-  const code = Math.random().toString(36).slice(2, 8).toUpperCase();
-  bookingRef.value = `BK-${code}`;
-  booked.value = true;
-  scrollTop();
+  const startsAt = buildStartsAt();
+  if (!barberId.value || !serviceId.value || !startsAt) return;
+  reserveLoading.value = true;
+  try {
+    const booking = await api<{ id: string; status: string; startsAt: string; endsAt: string }>(
+      '/api/booking',
+      {
+        method: 'POST',
+        token: auth.accessToken,
+        body: {
+          serviceId: serviceId.value,
+          staffId: barberId.value,
+          startsAt,
+          notes: notes.value || undefined,
+        },
+      },
+    );
+    localStorage.removeItem(DRAFT_KEY);
+    bookingRef.value = booking.id.replace(/-/g, '').slice(0, 8).toUpperCase();
+    booked.value = true;
+    scrollTop();
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 409) {
+      reserveError.value = 'TERMIN JE ZAUZET, IZABERI DRUGI';
+    } else if (error instanceof ApiRequestError && error.status === 400) {
+      reserveError.value = 'NEISPRAVNA REZERVACIJA';
+    } else {
+      reserveError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
+    }
+  } finally {
+    reserveLoading.value = false;
+  }
 }
 
 function reset(): void {
@@ -141,6 +203,7 @@ function reset(): void {
 }
 
 onMounted(() => {
+  void loadCatalog();
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return;
@@ -172,9 +235,9 @@ onMounted(() => {
         </p>
         <div v-if="selectedBarber && selectedService && dateLabel && time" class="mt-6">
           <BookingSummary
-            :barber-name="selectedBarber.name"
+            :barber-name="selectedBarber.firstName + ' ' + selectedBarber.lastName"
             :service-name="selectedService.name"
-            :duration-min="selectedService.durationMin"
+            :duration-min="selectedService.durationMinutes"
             :price="selectedService.price"
             :date-label="dateLabel"
             :time="time"
@@ -194,7 +257,25 @@ onMounted(() => {
 
         <section v-if="step === 1" aria-label="Choose barber">
           <h2 class="mt-8 text-3xl tracking-widest text-bone">01 / IZABERI BERBERINA</h2>
-          <div class="mt-4 flex flex-col gap-3">
+          <p v-if="catalogLoading" class="mt-4 text-xl tracking-widest text-ash">
+            UČITAVANJE...
+          </p>
+          <div v-else-if="catalogError" class="mt-4">
+            <p
+              role="alert"
+              class="border border-alarm p-3 text-center text-lg tracking-widest text-alarm"
+            >
+              {{ catalogError }}
+            </p>
+            <button
+              type="button"
+              class="mt-3 w-full border border-line py-3 text-2xl tracking-widest text-bone hover:border-bone"
+              @click="loadCatalog"
+            >
+              POKUŠAJ PONOVO
+            </button>
+          </div>
+          <div v-else class="mt-4 flex flex-col gap-3">
             <BarberOption
               v-for="b in barbers"
               :key="b.id"
@@ -207,7 +288,25 @@ onMounted(() => {
 
         <section v-if="step === 2" aria-label="Choose service">
           <h2 class="mt-8 text-3xl tracking-widest text-bone">02 / IZABERI USLUGU</h2>
-          <div class="mt-4 flex flex-col gap-3">
+          <p v-if="catalogLoading" class="mt-4 text-xl tracking-widest text-ash">
+            UČITAVANJE...
+          </p>
+          <div v-else-if="catalogError" class="mt-4">
+            <p
+              role="alert"
+              class="border border-alarm p-3 text-center text-lg tracking-widest text-alarm"
+            >
+              {{ catalogError }}
+            </p>
+            <button
+              type="button"
+              class="mt-3 w-full border border-line py-3 text-2xl tracking-widest text-bone hover:border-bone"
+              @click="loadCatalog"
+            >
+              POKUŠAJ PONOVO
+            </button>
+          </div>
+          <div v-else class="mt-4 flex flex-col gap-3">
             <ServiceOption
               v-for="s in services"
               :key="s.id"
@@ -239,9 +338,9 @@ onMounted(() => {
             class="mt-4"
           >
             <BookingSummary
-              :barber-name="selectedBarber.name"
+              :barber-name="selectedBarber.firstName + ' ' + selectedBarber.lastName"
               :service-name="selectedService.name"
-              :duration-min="selectedService.durationMin"
+              :duration-min="selectedService.durationMinutes"
               :price="selectedService.price"
               :date-label="dateLabel"
               :time="time"
@@ -260,12 +359,20 @@ onMounted(() => {
             placeholder="NEŠTO ŠTO BERBERIN TREBA DA ZNA"
             class="mt-2 w-full border border-line bg-ink px-3 py-2 text-lg tracking-widest text-bone placeholder:text-ash"
           />
+          <p
+            v-if="reserveError"
+            role="alert"
+            class="mt-4 border border-alarm p-3 text-center text-lg tracking-widest text-alarm"
+          >
+            {{ reserveError }}
+          </p>
           <button
             type="button"
-            class="mt-4 w-full bg-blaze py-3 text-2xl tracking-widest text-ink hover:opacity-90"
+            :disabled="reserveLoading"
+            class="mt-4 w-full bg-blaze py-3 text-2xl tracking-widest text-ink hover:opacity-90 disabled:opacity-40"
             @click="reserve"
           >
-            REZERVIŠI
+            {{ reserveLoading ? 'UČITAVANJE...' : 'REZERVIŠI' }}
           </button>
           <button
             type="button"

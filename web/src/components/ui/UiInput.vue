@@ -57,7 +57,7 @@ defineExpose({ validate, setError });
         :aria-describedby="error ? `${id}-error` : undefined"
         :class="
           cn(
-            'w-full border bg-ink px-3 py-2 text-xl tracking-widest text-bone outline-none placeholder:text-ash placeholder:opacity-50',
+            'w-full border bg-ink px-3 py-2 font-form text-xl tracking-normal text-bone normal-case outline-none placeholder:text-ash placeholder:opacity-50',
             error ? 'border-alarm focus:border-alarm' : 'border-line focus:border-bone',
             isPassword && 'pr-11',
           )

@@ -10,6 +10,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-ink: #080808;
   --color-surface: #111111;
@@ -21,4 +29,5 @@
 
   --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
   --font-sans: "Bebas Neue", "Arial Narrow", sans-serif;
+  --font-form: "Inter", system-ui, sans-serif;
 }

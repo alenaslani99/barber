@@ -3,7 +3,7 @@ defineProps<{
   barberName: string;
   serviceName: string;
   durationMin: number;
-  price: string;
+  price: number;
   dateLabel: string;
   time: string;
 }>();

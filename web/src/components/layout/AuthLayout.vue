@@ -17,7 +17,7 @@ defineProps<{ title: string; description: string }>();
         {{ title }}
       </h1>
       <p class="mt-2 text-center text-xl tracking-widest text-ash">{{ description }}</p>
-      <div class="mt-8">
+      <div class="mx-auto mt-8 w-full max-w-md">
         <slot name="fields" />
       </div>
       <div class="mt-6 text-center">

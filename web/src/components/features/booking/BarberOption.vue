@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { cn } from '../../../utils/cn';
-import type { Barber } from '../../../data/mock';
+import type { ApiBarber } from '../../../lib/catalog';
 
-const props = defineProps<{ barber: Barber; selected: boolean }>();
+const props = defineProps<{ barber: ApiBarber; selected: boolean }>();
 defineEmits<{ (e: 'select', id: string): void }>();
 
-const initials = computed(() =>
-  props.barber.name
-    .split(' ')
-    .map((w) => w.charAt(0))
-    .slice(0, 2)
-    .join(''),
+const initials = computed(
+  () => `${props.barber.firstName.charAt(0)}${props.barber.lastName.charAt(0)}`,
 );
+const fullName = computed(() => `${props.barber.firstName} ${props.barber.lastName}`);
 </script>
 
 <template>
@@ -40,17 +37,10 @@ const initials = computed(() =>
     >
       {{ initials }}
     </span>
-    <span class="flex w-full items-center justify-between gap-3">
-      <span>
-        <span class="block text-2xl leading-none tracking-widest">{{ barber.name }}</span>
-        <span :class="cn('block text-lg tracking-widest', selected ? 'text-ink' : 'text-ash')">
-          {{ barber.role }}
-        </span>
-      </span>
-      <span
-        :class="cn('shrink-0 text-lg tracking-widest', selected ? 'text-ink' : 'text-ash')"
-      >
-        {{ barber.nextAvailable }}
+    <span>
+      <span class="block text-2xl leading-none tracking-widest">{{ fullName }}</span>
+      <span :class="cn('block text-lg tracking-widest', selected ? 'text-ink' : 'text-ash')">
+        {{ barber.seniority }}
       </span>
     </span>
   </button>

@@ -5,12 +5,12 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
 
 namespace Barber.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[AllowAnonymous]
 public sealed class AuthController(
     RegisterUserHandler register,
     LoginUserHandler login,
@@ -18,11 +18,15 @@ public sealed class AuthController(
     LogoutUserHandler logout,
     IValidator<RegisterUserCommand> registerValidator,
     IValidator<LoginUserCommand> loginValidator,
+    IValidator<ChangePasswordCommand> changePasswordValidator,
+    GetMyProfileHandler me,
+    ChangePasswordHandler changePassword,
     IWebHostEnvironment env,
     IOptions<JwtSettings> jwt) : ControllerBase
 {
     private const string RefreshCookieName = "barber_refresh";
 
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<SessionResponse>> Register(RegisterRequest request, CancellationToken ct)
     {
@@ -33,6 +37,7 @@ public sealed class AuthController(
         return Ok(ToResponse(result));
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<SessionResponse>> Login(LoginRequest request, CancellationToken ct)
     {
@@ -43,6 +48,7 @@ public sealed class AuthController(
         return Ok(ToResponse(result));
     }
 
+    [AllowAnonymous]
     [HttpPost("refresh")]
     public async Task<ActionResult<SessionResponse>> Refresh(CancellationToken ct)
     {
@@ -53,12 +59,37 @@ public sealed class AuthController(
         return Ok(ToResponse(result));
     }
 
+    [AllowAnonymous]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
         if (Request.Cookies.TryGetValue(RefreshCookieName, out string? refreshToken) && !string.IsNullOrWhiteSpace(refreshToken))
             await logout.HandleAsync(new LogoutUserCommand(refreshToken), ct);
         Response.Cookies.Delete(RefreshCookieName, DeleteCookieOptions());
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<ProfileResponse>> Me(CancellationToken ct)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId))
+            return Unauthorized();
+        UserProfileResult? profile = await me.HandleAsync(new GetMyProfileQuery(userId), ct);
+        if (profile is null)
+            return NotFound();
+        return Ok(new ProfileResponse(profile.Id, profile.FirstName, profile.LastName, profile.Email, profile.Phone));
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken ct)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId))
+            return Unauthorized();
+        ChangePasswordCommand command = new(userId, request.CurrentPassword, request.NewPassword);
+        await changePasswordValidator.ValidateAndThrowAsync(command, ct);
+        await changePassword.HandleAsync(command, ct);
         return NoContent();
     }
 

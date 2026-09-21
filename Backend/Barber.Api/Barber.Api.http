@@ -32,6 +32,40 @@ X-Tenant-Slug: demo
 POST https://localhost:7145/api/auth/logout
 X-Tenant-Slug: demo
 
+### Me (needs: Authorization: Bearer <access-token>)
+GET https://localhost:7145/api/auth/me
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+
+### My bookings (needs: Authorization: Bearer <access-token>)
+GET https://localhost:7145/api/booking/mine?skip=0&take=5
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+
+### Create booking (needs: Authorization: Bearer <access-token>)
+POST https://localhost:7145/api/booking
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{"serviceId":"e1e1e1e1-1111-4111-8111-111111111111","staffId":"a1a1a1a1-1111-4111-8111-111111111111","startsAt":"2026-09-28T14:30:00.000Z","notes":"Test"}
+
+### Barbers (public)
+GET https://localhost:7145/api/staff
+X-Tenant-Slug: demo
+
+### Services (public)
+GET https://localhost:7145/api/service
+X-Tenant-Slug: demo
+
+### Change password (needs: Authorization: Bearer <access-token>)
+POST https://localhost:7145/api/auth/change-password
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{"currentPassword":"DemoPass123","newPassword":"DemoPass456"}
+
 ### Create staff (Owner only)
 POST https://localhost:7145/api/staff
 X-Tenant-Slug: demo

@@ -1,3 +1,4 @@
+using Barber.Application.Logging;
 using Barber.Application.UseCases;
 using Barber.Application.Validators;
 using FluentValidation;
@@ -14,6 +15,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<RefreshSessionHandler>();
         services.AddScoped<LogoutUserHandler>();
         services.AddScoped<CreateStaffHandler>();
+        services.AddScoped<GetMyProfileHandler>();
+        services.AddScoped<GetMyBookingsHandler>();
+        services.AddScoped<GetBookingsHandler>();
+        services.AddScoped<GetBarbersHandler>();
+        services.AddScoped<GetServicesHandler>();
+        services.AddScoped<CreateBookingHandler>();
+        services.AddScoped<ChangePasswordHandler>();
+        services.AddScoped<AuditWriter>();
         services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
         return services;
     }

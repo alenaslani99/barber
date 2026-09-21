@@ -1,5 +1,6 @@
 using Barber.Application.Auth;
 using Barber.Application.Exceptions;
+using Barber.Application.Logging;
 using Barber.DataAccess;
 using Barber.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,8 @@ public sealed class RegisterUserHandler(
     IPasswordService passwords,
     IJwtTokenService tokens,
     IOptions<JwtSettings> settings,
-    ITenantProvider tenants)
+    ITenantProvider tenants,
+    AuditWriter audit)
 {
     public async Task<AuthResult> HandleAsync(RegisterUserCommand command, CancellationToken ct = default)
     {
@@ -37,6 +39,8 @@ public sealed class RegisterUserHandler(
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
 
-        return await SessionIssuer.IssueAsync(db, tokens, settings.Value, user, tenants.GetSlug(), ct);
+        AuthResult result = await SessionIssuer.IssueAsync(db, tokens, settings.Value, user, tenants.GetSlug(), ct);
+        await audit.WriteAsync("auth.register", user.Email, user.Id, ct: ct);
+        return result;
     }
 }

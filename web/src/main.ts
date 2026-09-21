@@ -8,12 +8,12 @@ import { useAuthStore } from './stores/auth';
 async function bootstrap(): Promise<void> {
   const app = createApp(App);
   app.use(createPinia());
-  app.use(router);
   try {
     await useAuthStore().boot();
   } catch {
     // Stay logged out when the silent refresh fails.
   }
+  app.use(router);
   app.mount('#app');
 }
 

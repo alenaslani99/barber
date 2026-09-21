@@ -21,24 +21,34 @@ const todaySummary = computed(() => {
     <div class="mx-auto w-full border-b border-line px-4 lg:w-1/2">
       <div class="flex items-center justify-between py-3">
         <p class="text-lg tracking-widest text-ash">{{ shop.tagline }}</p>
-        <RouterLink
-          v-if="auth.isAuthenticated"
-          to="/account"
-          class="flex items-center gap-2 border border-blaze px-4 py-1 text-lg tracking-widest text-blaze hover:bg-blaze hover:text-ink"
-          aria-label="Nalog"
-        >
-          <User class="h-4 w-4" aria-hidden="true" />
-          {{ auth.displayName }}
-        </RouterLink>
-        <RouterLink
-          v-else
-          to="/login"
-          class="flex items-center gap-2 border border-blaze px-4 py-1 text-lg tracking-widest text-blaze hover:bg-blaze hover:text-ink"
-          aria-label="Prijava"
-        >
-          <User class="h-4 w-4" aria-hidden="true" />
-          PRIJAVA
-        </RouterLink>
+        <div class="flex items-center gap-2">
+          <RouterLink
+            v-if="auth.canManage"
+            to="/owner"
+            class="border border-line px-4 py-1 text-lg tracking-widest text-ash hover:border-bone hover:text-bone"
+            aria-label="Panel"
+          >
+            PANEL
+          </RouterLink>
+          <RouterLink
+            v-if="auth.isAuthenticated"
+            to="/account"
+            class="flex items-center gap-2 border border-blaze px-4 py-1 text-lg tracking-widest text-blaze hover:bg-blaze hover:text-ink"
+            aria-label="Nalog"
+          >
+            <User class="h-4 w-4" aria-hidden="true" />
+            {{ auth.displayName }}
+          </RouterLink>
+          <RouterLink
+            v-else
+            to="/login"
+            class="flex items-center gap-2 border border-blaze px-4 py-1 text-lg tracking-widest text-blaze hover:bg-blaze hover:text-ink"
+            aria-label="Prijava"
+          >
+            <User class="h-4 w-4" aria-hidden="true" />
+            PRIJAVA
+          </RouterLink>
+        </div>
       </div>
 
       <h1 class="font-display text-6xl leading-none tracking-wide sm:text-7xl">

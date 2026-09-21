@@ -22,7 +22,14 @@ interface TokenPayload {
   family_name?: string;
   role?: string;
   tenant?: string;
+  [claim: string]: unknown;
 }
+
+const ROLE_CLAIMS = [
+  'http://schemas.microsoft.com/ws/2008/06/identity/claims/role',
+  'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role',
+  'role',
+];
 
 function decodePayload(token: string): TokenPayload | null {
   try {
@@ -51,6 +58,15 @@ export const useAuthStore = defineStore('auth', () => {
   const firstName = computed(() => payload.value?.given_name ?? '');
   const lastName = computed(() => payload.value?.family_name ?? '');
   const email = computed(() => payload.value?.email ?? '');
+  const role = computed(() => {
+    if (!payload.value) return '';
+    for (const key of ROLE_CLAIMS) {
+      const value = payload.value[key];
+      if (typeof value === 'string' && value) return value;
+    }
+    return '';
+  });
+  const canManage = computed(() => role.value === 'Owner' || role.value === 'Barber');
   const displayName = computed(() => {
     const full = `${firstName.value} ${lastName.value}`.trim();
     if (full) return full.toUpperCase();
@@ -159,6 +175,8 @@ export const useAuthStore = defineStore('auth', () => {
     firstName,
     lastName,
     email,
+    role,
+    canManage,
     displayName,
     login,
     register,

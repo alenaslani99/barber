@@ -19,6 +19,8 @@ public sealed class TenantContext : DbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<WorkingHours> WorkingHours => Set<WorkingHours>();
+    public DbSet<WorkingDayOverride> WorkingDayOverrides => Set<WorkingDayOverride>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

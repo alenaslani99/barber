@@ -50,6 +50,14 @@ Content-Type: application/json
 
 {"serviceId":"e1e1e1e1-1111-4111-8111-111111111111","staffId":"a1a1a1a1-1111-4111-8111-111111111111","startsAt":"2026-09-28T14:30:00.000Z","notes":"Test"}
 
+### Change booking status (Owner or owning barber)
+PATCH https://localhost:7145/api/booking/<id>/status
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{"status":"Confirmed"}
+
 ### Barbers (public)
 GET https://localhost:7145/api/staff
 X-Tenant-Slug: demo

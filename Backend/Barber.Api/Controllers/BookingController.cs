@@ -14,8 +14,11 @@ namespace Barber.Api.Controllers;
 public sealed class BookingController(
     GetMyBookingsHandler mine,
     GetBookingsHandler all,
+    GetAvailabilityHandler availability,
     CreateBookingHandler create,
-    IValidator<CreateBookingCommand> validator) : ControllerBase
+    UpdateBookingStatusHandler changeStatus,
+    IValidator<CreateBookingCommand> createValidator,
+    IValidator<UpdateBookingStatusCommand> statusValidator) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<AdminBookingsResponse>> List(
@@ -82,9 +85,44 @@ public sealed class BookingController(
     {
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId))
             return Unauthorized();
-        CreateBookingCommand command = new(userId, request.ServiceId, request.StaffId, request.StartsAt, request.Notes);
-        await validator.ValidateAndThrowAsync(command, ct);
-        BookingResult result = await create.HandleAsync(command, ct);
+        CreateBookingCommand createCommand = new(userId, request.ServiceId, request.StaffId, request.StartsAt, request.Notes);
+        await createValidator.ValidateAndThrowAsync(createCommand, ct);
+        BookingResult result = await create.HandleAsync(createCommand, ct);
         return Ok(new BookingResponse(result.Id, result.Status, result.StartsAt, result.EndsAt));
+    }
+
+    [Authorize]
+    [HttpPatch("{id:guid}/status")]
+    public async Task<ActionResult<AdminBookingResponse>> ChangeStatus(
+        Guid id, ChangeBookingStatusRequest request, CancellationToken ct)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId))
+            return Unauthorized();
+        bool ownerView = User.IsInRole(nameof(UserRole.Owner));
+        if (!ownerView && !User.IsInRole(nameof(UserRole.Barber)))
+            return NotFound();
+        UpdateBookingStatusCommand command = new(id, userId, ownerView, request.Status);
+        await statusValidator.ValidateAndThrowAsync(command, ct);
+        BookingListItem? item = await changeStatus.HandleAsync(command, ct);
+        if (item is null)
+            return NotFound();
+        return Ok(new AdminBookingResponse(
+            item.Id, item.ServiceName, item.BarberName, item.ClientName,
+            item.StartsAt, item.EndsAt, item.Status));
+    }
+
+    [AllowAnonymous]
+    [HttpGet("availability")]
+    public async Task<ActionResult<AvailabilityResponse>> Availability(
+        [FromQuery] Guid? staffId, [FromQuery] DateOnly? date, [FromQuery] Guid? serviceId, CancellationToken ct)
+    {
+        if (!staffId.HasValue || !date.HasValue)
+            return BadRequest();
+        AvailabilityResult? result = await availability.HandleAsync(
+            new GetAvailabilityQuery(staffId.Value, date.Value, serviceId), ct);
+        if (result is null)
+            return NotFound();
+        return Ok(new AvailabilityResponse(
+            result.Date, result.Closed, result.Open, result.Close, result.SlotMinutes, result.Taken));
     }
 }

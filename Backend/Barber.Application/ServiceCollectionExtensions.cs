@@ -18,6 +18,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetMyProfileHandler>();
         services.AddScoped<GetMyBookingsHandler>();
         services.AddScoped<GetBookingsHandler>();
+        services.AddScoped<GetAvailabilityHandler>();
+        services.AddScoped<UpdateBookingStatusHandler>();
+        services.AddScoped<GetDaysOffHandler>();
+        services.AddScoped<CreateDayOffHandler>();
+        services.AddScoped<DeleteDayOffHandler>();
         services.AddScoped<GetBarbersHandler>();
         services.AddScoped<GetServicesHandler>();
         services.AddScoped<CreateBookingHandler>();

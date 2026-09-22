@@ -26,6 +26,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetBarbersHandler>();
         services.AddScoped<GetServicesHandler>();
         services.AddScoped<GetShopHandler>();
+        services.AddScoped<CreateServiceHandler>();
+        services.AddScoped<UpdateServiceHandler>();
+        services.AddScoped<UpdateStaffHandler>();
+        services.AddScoped<GetWorkingHoursHandler>();
+        services.AddScoped<UpdateWorkingHoursHandler>();
         services.AddScoped<CreateBookingHandler>();
         services.AddScoped<ChangePasswordHandler>();
         services.AddScoped<AuditWriter>();

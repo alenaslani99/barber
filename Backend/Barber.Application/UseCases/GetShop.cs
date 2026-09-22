@@ -36,7 +36,7 @@ public sealed class GetShopHandler(
             .Where(h => h.BarbershopId == shop.Id)
             .ToListAsync(ct);
 
-        List<BarberListItem> staff = await barbers.HandleAsync(ct);
+        List<BarberListItem> staff = await barbers.HandleAsync(false, ct);
         List<ServiceListItem> serviceList = await services.HandleAsync(ct);
 
         List<ShopHourItem> hourItems = hours

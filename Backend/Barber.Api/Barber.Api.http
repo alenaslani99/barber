@@ -66,6 +66,43 @@ X-Tenant-Slug: demo
 GET https://localhost:7145/api/service
 X-Tenant-Slug: demo
 
+### Create service (Owner only)
+POST https://localhost:7145/api/service
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{"barbershopId":"73f1e611-9f30-48d2-8ce6-531610f6f676","name":"TEST USLUGA","price":1000,"durationMinutes":30,"slotMinutes":30}
+
+### Update service (Owner only)
+PATCH https://localhost:7145/api/service/e1e1e1e1-1111-4111-8111-111111111111
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{"price":2100}
+
+### Deactivate staff (Owner only)
+PATCH https://localhost:7145/api/staff/a1a1a1a1-1111-4111-8111-111111111111
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{"isActive":false}
+
+### Working hours (Owner only)
+GET https://localhost:7145/api/workinghours?barbershopId=73f1e611-9f30-48d2-8ce6-531610f6f676
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+
+### Replace working hours (Owner only)
+PUT https://localhost:7145/api/workinghours
+X-Tenant-Slug: demo
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{"barbershopId":"73f1e611-9f30-48d2-8ce6-531610f6f676","hours":[{"day":1,"open":"09:00","close":"20:00","isClosed":false},{"day":2,"open":"09:00","close":"20:00","isClosed":false},{"day":3,"open":"09:00","close":"20:00","isClosed":false},{"day":4,"open":"09:00","close":"20:00","isClosed":false},{"day":5,"open":"09:00","close":"20:00","isClosed":false},{"day":6,"open":"09:00","close":"18:00","isClosed":false},{"day":0,"open":"00:00","close":"00:00","isClosed":true}]}
+
 ### Shop with hours, staff and services (public)
 GET https://localhost:7145/api/barbershop
 X-Tenant-Slug: demo

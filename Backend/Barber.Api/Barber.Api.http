@@ -66,6 +66,10 @@ X-Tenant-Slug: demo
 GET https://localhost:7145/api/service
 X-Tenant-Slug: demo
 
+### Shop with hours, staff and services (public)
+GET https://localhost:7145/api/barbershop
+X-Tenant-Slug: demo
+
 ### Change password (needs: Authorization: Bearer <access-token>)
 POST https://localhost:7145/api/auth/change-password
 X-Tenant-Slug: demo

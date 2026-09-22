@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DeleteDayOffHandler>();
         services.AddScoped<GetBarbersHandler>();
         services.AddScoped<GetServicesHandler>();
+        services.AddScoped<GetShopHandler>();
         services.AddScoped<CreateBookingHandler>();
         services.AddScoped<ChangePasswordHandler>();
         services.AddScoped<AuditWriter>();

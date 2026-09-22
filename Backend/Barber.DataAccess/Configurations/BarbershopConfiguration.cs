@@ -12,6 +12,8 @@ public sealed class BarbershopConfiguration : IEntityTypeConfiguration<Barbersho
         builder.Property(x => x.Name).IsRequired().HasMaxLength(200);
         builder.Property(x => x.Address).HasMaxLength(500);
         builder.Property(x => x.Phone).HasMaxLength(32);
+        builder.Property(x => x.Tagline).IsRequired().HasMaxLength(100);
+        builder.Property(x => x.Description).IsRequired().HasMaxLength(500);
         builder.Property(x => x.TimeZone).IsRequired().HasMaxLength(64);
     }
 }

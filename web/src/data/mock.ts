@@ -81,13 +81,6 @@ export const services: Service[] = [
   { id: 's-shave', name: 'BRIJANJE TOPLIM PEŠKIROM', description: 'BRITVA, HLADAN FINIŠ', durationMin: 30, price: '2.200 RSD' },
 ];
 
-const SLOT_TIMES = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-  '18:00', '18:30', '19:00', '19:30',
-];
-
 const WEEKDAYS = ['NED', 'PON', 'UTO', 'SRE', 'ČET', 'PET', 'SUB'];
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAJ', 'JUN', 'JUL', 'AVG', 'SEP', 'OKT', 'NOV', 'DEC'];
 
@@ -107,19 +100,4 @@ export function getNextDays(count = 14): DayOption[] {
     });
   }
   return days;
-}
-
-function hashCode(input: string): number {
-  let h = 0;
-  for (let i = 0; i < input.length; i += 1) {
-    h = (h * 31 + input.charCodeAt(i)) | 0;
-  }
-  return Math.abs(h);
-}
-
-export function getSlots(dateIso: string, barberId: string | null): TimeSlot[] {
-  return SLOT_TIMES.map((time) => {
-    const h = hashCode(`${dateIso}|${barberId ?? 'any'}|${time}`);
-    return { id: `${dateIso}-${time}`, time, available: h % 10 < 7 };
-  });
 }

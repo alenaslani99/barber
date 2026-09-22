@@ -10,6 +10,6 @@ public sealed class CreateBookingValidator : AbstractValidator<CreateBookingComm
         RuleFor(x => x.ServiceId).NotEmpty();
         RuleFor(x => x.StaffId).NotEmpty();
         RuleFor(x => x.StartsAt).GreaterThan(DateTimeOffset.UtcNow);
-        RuleFor(x => x.Notes).MaximumLength(1000);
+        RuleFor(x => x.Notes).MaximumLength(500);
     }
 }

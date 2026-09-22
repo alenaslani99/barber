@@ -2,12 +2,14 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { api, ApiRequestError } from '../lib/api';
-import { getNextDays, getSlots } from '../data/mock';
+import { getNextDays, type TimeSlot } from '../data/mock';
 import {
+  fetchAvailability,
   fetchBarbers,
   fetchServices,
   type ApiBarber,
   type ApiService,
+  type Availability,
 } from '../lib/catalog';
 import BookingStepper from '../components/features/booking/BookingStepper.vue';
 import ShopHeader from '../components/layout/ShopHeader.vue';
@@ -69,7 +71,55 @@ const selectedBarber = computed(() => barbers.value.find((b) => b.id === barberI
 const selectedService = computed(
   () => services.value.find((s) => s.id === serviceId.value) ?? null,
 );
-const slots = computed(() => (dateIso.value ? getSlots(dateIso.value, barberId.value) : []));
+const avail = ref<Availability | null>(null);
+const availLoading = ref(false);
+const availError = ref('');
+
+function toLocalIsoDay(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+async function loadAvailability(): Promise<void> {
+  availError.value = '';
+  if (!barberId.value || !serviceId.value || !dateIso.value) {
+    avail.value = null;
+    return;
+  }
+  availLoading.value = true;
+  try {
+    avail.value = await fetchAvailability(barberId.value, dateIso.value, serviceId.value);
+  } catch {
+    avail.value = null;
+    availError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
+  } finally {
+    availLoading.value = false;
+  }
+}
+
+const slots = computed<TimeSlot[]>(() => {
+  if (!avail.value || avail.value.closed || !dateIso.value) return [];
+  const taken = new Set(avail.value.taken);
+  const [oh, om] = avail.value.open.split(':').map(Number);
+  const [ch, cm] = avail.value.close.split(':').map(Number);
+  const step = avail.value.slotMinutes > 0 ? avail.value.slotMinutes : 30;
+  const now = new Date();
+  const isToday = dateIso.value === toLocalIsoDay(now);
+  const [y, mo, d] = dateIso.value.split('-').map(Number);
+  const result: TimeSlot[] = [];
+  for (let m = oh * 60 + om; m + step <= ch * 60 + cm; m += step) {
+    const hh = String(Math.floor(m / 60)).padStart(2, '0');
+    const mm = String(m % 60).padStart(2, '0');
+    const time = `${hh}:${mm}`;
+    let available = !taken.has(time);
+    if (available && isToday) {
+      available = new Date(y, mo - 1, d, Number(hh), Number(mm)).getTime() > now.getTime();
+    }
+    result.push({ id: `${dateIso.value}-${time}`, time, available });
+  }
+  return result;
+});
 const dateLabel = computed(() => {
   const d = days.find((day) => day.iso === dateIso.value);
   return d ? `${d.weekday} ${d.dayNum} ${d.month}` : '';
@@ -98,17 +148,20 @@ function selectBarber(id: string): void {
   barberId.value = id;
   step.value = 2;
   scrollTop();
+  void loadAvailability();
 }
 
 function selectService(id: string): void {
   serviceId.value = id;
   step.value = 3;
   scrollTop();
+  void loadAvailability();
 }
 
 function selectDate(iso: string): void {
   dateIso.value = iso;
   time.value = null;
+  void loadAvailability();
 }
 
 function selectTime(t: string): void {
@@ -119,6 +172,7 @@ function next(): void {
   if (step.value < 4 && canContinue.value) {
     step.value = (step.value + 1) as Step;
     scrollTop();
+    void loadAvailability();
   }
 }
 
@@ -130,7 +184,10 @@ function back(): void {
 }
 
 function goTo(s: number): void {
-  if (s >= 1 && s <= 4 && s < step.value) step.value = s as Step;
+  if (s >= 1 && s <= 4 && s < step.value) {
+    step.value = s as Step;
+    void loadAvailability();
+  }
 }
 
 function buildStartsAt(): string | null {
@@ -326,8 +383,29 @@ onMounted(() => {
             PRVO IZABERI DAN
           </p>
           <div v-else class="mt-4">
-            <TimeGrid :slots="slots" :selected-time="time" @select="selectTime" />
-            <p v-if="!time" class="mt-4 text-xl tracking-widest text-ash">IZABERI TERMIN</p>
+            <p v-if="availLoading" class="text-xl tracking-widest text-ash">UČITAVANJE...</p>
+            <div v-else-if="availError">
+              <p
+                role="alert"
+                class="border border-alarm p-3 text-center text-lg tracking-widest text-alarm"
+              >
+                {{ availError }}
+              </p>
+              <button
+                type="button"
+                class="mt-3 w-full border border-line py-3 text-2xl tracking-widest text-bone hover:border-bone"
+                @click="loadAvailability"
+              >
+                POKUŠAJ PONOVO
+              </button>
+            </div>
+            <p v-else-if="avail?.closed" class="text-xl tracking-widest text-ash">
+              ZATVORENO
+            </p>
+            <div v-else>
+              <TimeGrid :slots="slots" :selected-time="time" @select="selectTime" />
+              <p v-if="!time" class="mt-4 text-xl tracking-widest text-ash">IZABERI TERMIN</p>
+            </div>
           </div>
         </section>
 
@@ -357,6 +435,7 @@ onMounted(() => {
             v-model="notes"
             rows="3"
             placeholder="NEŠTO ŠTO BERBERIN TREBA DA ZNA"
+            maxlength="500"
             class="mt-2 w-full border border-line bg-ink px-3 py-2 text-lg tracking-widest text-bone placeholder:text-ash"
           />
           <p

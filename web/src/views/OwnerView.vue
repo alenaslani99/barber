@@ -416,12 +416,14 @@ async function loadHours(): Promise<void> {
   const shopId = shopStore.shop?.id;
   if (!shopId) return;
   try {
-    const rows = await api<ShopHoursRow[]>(`/api/workinghours?barbershopId=${shopId}`, {
-      token: auth.accessToken,
-    });
+    const rows = await api<Array<{ day: number; open: string; close: string; isClosed: boolean }>>(
+      `/api/workinghours?barbershopId=${shopId}`,
+      { token: auth.accessToken },
+    );
     hoursRows.value = [1, 2, 3, 4, 5, 6, 0].map((day) => {
       const found = rows.find((r) => r.day === day);
-      return found ?? { day, open: '09:00', close: '20:00', closed: day === 0 };
+      if (found) return { day, open: found.open, close: found.close, closed: found.isClosed };
+      return { day, open: '09:00', close: '20:00', closed: day === 0 };
     });
   } catch {
     hoursError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';

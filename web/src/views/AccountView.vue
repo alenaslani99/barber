@@ -3,7 +3,7 @@ import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { api, ApiRequestError } from '../lib/api';
 import { useAuthStore } from '../stores/auth';
-import { shop } from '../data/mock';
+import { useShopStore } from '../stores/shop';
 import UiInput from '../components/ui/UiInput.vue';
 
 interface Profile {
@@ -42,6 +42,7 @@ const PAGE_SIZE = 5;
 
 const auth = useAuthStore();
 const router = useRouter();
+const shopStore = useShopStore();
 
 const tab = ref<Tab>('general');
 const profile = ref<Profile | null>(null);
@@ -99,6 +100,7 @@ async function loadHistory(): Promise<void> {
 }
 
 onMounted(async () => {
+  void shopStore.load();
   try {
     const p = await api<Profile>('/api/auth/me', { token: auth.accessToken });
     profile.value = p;
@@ -156,9 +158,9 @@ async function logout(): Promise<void> {
 <template>
   <main class="bg-ink text-bone">
     <div class="mx-auto w-full px-4 py-10 lg:w-1/2">
-      <p class="text-center text-lg tracking-widest">
+      <p v-if="shopStore.shop" class="text-center text-lg tracking-widest">
         <RouterLink to="/" class="text-ash hover:text-bone" aria-label="Nazad na početnu">
-          {{ shop.name }}
+          {{ shopStore.shop.name }}
         </RouterLink>
       </p>
       <h1 class="mt-2 text-center font-display text-6xl leading-none tracking-wide">NALOG</h1>

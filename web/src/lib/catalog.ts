@@ -14,6 +14,25 @@ export interface ApiService {
   price: number;
 }
 
+export interface ApiShopHour {
+  day: number;
+  open: string;
+  close: string;
+  closed: boolean;
+}
+
+export interface ApiShop {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  address: string;
+  phone: string;
+  hours: ApiShopHour[];
+  staff: ApiBarber[];
+  services: ApiService[];
+}
+
 export interface Availability {
   date: string;
   closed: boolean;
@@ -29,6 +48,10 @@ export function fetchBarbers(): Promise<ApiBarber[]> {
 
 export function fetchServices(): Promise<ApiService[]> {
   return api<ApiService[]>('/api/service', { auth: false });
+}
+
+export function fetchShop(): Promise<ApiShop> {
+  return api<ApiShop>('/api/barbershop', { auth: false });
 }
 
 export function fetchAvailability(

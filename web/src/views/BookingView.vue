@@ -5,12 +5,12 @@ import { api, ApiRequestError } from '../lib/api';
 import { getNextDays, type TimeSlot } from '../data/mock';
 import {
   fetchAvailability,
-  fetchBarbers,
-  fetchServices,
   type ApiBarber,
   type ApiService,
+  type ApiShop,
   type Availability,
 } from '../lib/catalog';
+import { useShopStore } from '../stores/shop';
 import BookingStepper from '../components/features/booking/BookingStepper.vue';
 import ShopHeader from '../components/layout/ShopHeader.vue';
 import BarberOption from '../components/features/booking/BarberOption.vue';
@@ -33,6 +33,7 @@ const DRAFT_KEY = 'barber.booking.draft';
 
 const auth = useAuthStore();
 const router = useRouter();
+const shopStore = useShopStore();
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -48,21 +49,25 @@ const reserveLoading = ref(false);
 const reserveError = ref('');
 const barbers = ref<ApiBarber[]>([]);
 const services = ref<ApiService[]>([]);
+const shop = ref<ApiShop | null>(null);
 const catalogLoading = ref(true);
 const catalogError = ref('');
 
-async function loadCatalog(): Promise<void> {
+async function loadShop(): Promise<void> {
   catalogLoading.value = true;
   catalogError.value = '';
-  try {
-    const [b, s] = await Promise.all([fetchBarbers(), fetchServices()]);
-    barbers.value = b;
-    services.value = s;
-  } catch {
+  const data = await shopStore.load();
+  if (!data) {
+    shop.value = null;
+    barbers.value = [];
+    services.value = [];
     catalogError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
-  } finally {
-    catalogLoading.value = false;
+  } else {
+    shop.value = data;
+    barbers.value = data.staff;
+    services.value = data.services;
   }
+  catalogLoading.value = false;
 }
 
 const days = getNextDays(14);
@@ -260,7 +265,7 @@ function reset(): void {
 }
 
 onMounted(() => {
-  void loadCatalog();
+  void loadShop();
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return;
@@ -279,7 +284,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <ShopHeader />
+  <ShopHeader
+    v-if="shop"
+    :name="shop.name"
+    :tagline="shop.tagline"
+    :description="shop.description"
+    :address="shop.address"
+    :phone="shop.phone"
+    :hours="shop.hours"
+  />
   <main class="bg-ink text-bone">
     <div class="mx-auto mt-16 w-full px-4 pb-8 lg:w-1/2">
       <div v-if="booked">
@@ -327,7 +340,7 @@ onMounted(() => {
             <button
               type="button"
               class="mt-3 w-full border border-line py-3 text-2xl tracking-widest text-bone hover:border-bone"
-              @click="loadCatalog"
+              @click="loadShop"
             >
               POKUŠAJ PONOVO
             </button>
@@ -358,7 +371,7 @@ onMounted(() => {
             <button
               type="button"
               class="mt-3 w-full border border-line py-3 text-2xl tracking-widest text-bone hover:border-bone"
-              @click="loadCatalog"
+              @click="loadShop"
             >
               POKUŠAJ PONOVO
             </button>

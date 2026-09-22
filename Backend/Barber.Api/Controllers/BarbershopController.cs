@@ -24,7 +24,7 @@ public sealed class BarbershopController(GetShopHandler shop) : ControllerBase
             result.Address,
             result.Phone,
             result.Hours.Select(h => new ShopHourResponse(h.Day, h.Open, h.Close, h.Closed)).ToList(),
-            result.Staff.Select(s => new BarberResponse(s.Id, s.FirstName, s.LastName, s.Seniority)).ToList(),
+            result.Staff.Select(s => new BarberResponse(s.Id, s.FirstName, s.LastName, s.Seniority, s.IsActive)).ToList(),
             result.Services.Select(s => new ServiceResponse(s.Id, s.Name, s.DurationMinutes, s.Price)).ToList()));
     }
 }

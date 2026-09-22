@@ -5,6 +5,7 @@ export interface ApiBarber {
   firstName: string;
   lastName: string;
   seniority: string;
+  isActive: boolean;
 }
 
 export interface ApiService {
@@ -42,8 +43,9 @@ export interface Availability {
   taken: string[];
 }
 
-export function fetchBarbers(): Promise<ApiBarber[]> {
-  return api<ApiBarber[]>('/api/staff', { auth: false });
+export function fetchBarbers(includeInactive = false, token: string | null = null): Promise<ApiBarber[]> {
+  const path = includeInactive ? '/api/staff?includeInactive=true' : '/api/staff';
+  return api<ApiBarber[]>(path, { token });
 }
 
 export function fetchServices(): Promise<ApiService[]> {

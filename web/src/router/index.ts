@@ -2,6 +2,7 @@
 import AccountView from '../views/AccountView.vue';
 import BookingView from '../views/BookingView.vue';
 import LoginView from '../views/LoginView.vue';
+import NotFoundView from '../views/NotFoundView.vue';
 import OwnerView from '../views/OwnerView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import { useAuthStore } from '../stores/auth';
@@ -22,18 +23,23 @@ const router = createRouter({
       path: '/owner',
       name: 'owner',
       component: OwnerView,
-      meta: { requiresAuth: true, roles: ['Owner', 'Barber'] },
+      meta: { requiresAuth: true, roles: ['Owner', 'Barber'], hidden: true },
     },
+    { path: '/:pathMatch(.*)*', name: 'notfound', component: NotFoundView },
   ],
 });
 
 router.beforeEach((to) => {
   const auth = useAuthStore();
+  const roles = to.meta.roles;
+  const roleOk = !Array.isArray(roles) || roles.includes(auth.role);
+  if (to.meta.hidden === true && (!auth.isAuthenticated || !roleOk)) {
+    return { name: 'notfound' };
+  }
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { path: '/login', query: { next: to.fullPath } };
   }
-  const roles = to.meta.roles;
-  if (Array.isArray(roles) && !roles.includes(auth.role)) {
+  if (!roleOk) {
     return { path: '/' };
   }
   return undefined;

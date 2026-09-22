@@ -51,6 +51,7 @@ const total = ref(0);
 const loading = ref(true);
 const loadingMore = ref(false);
 const loadError = ref('');
+const cancelError = ref('');
 
 const currentPw = ref('');
 const newPw = ref('');
@@ -153,6 +154,21 @@ async function logout(): Promise<void> {
   await auth.logout();
   await router.push('/');
 }
+
+async function cancelBooking(b: MyBooking): Promise<void> {
+  cancelError.value = '';
+  try {
+    const updated = await api<MyBooking>(`/api/booking/${b.id}/status`, {
+      method: 'PATCH',
+      token: auth.accessToken,
+      body: { status: 'Cancelled' },
+    });
+    const idx = bookings.value.findIndex((x) => x.id === b.id);
+    if (idx >= 0) bookings.value[idx] = updated;
+  } catch {
+    cancelError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
+  }
+}
 </script>
 
 <template>
@@ -249,6 +265,13 @@ async function logout(): Promise<void> {
           MOJE REZERVACIJE
           <span class="text-blaze">({{ total }})</span>
         </h2>
+        <p
+          v-if="cancelError"
+          role="alert"
+          class="mt-4 border border-alarm p-3 text-center text-lg tracking-widest text-alarm"
+        >
+          {{ cancelError }}
+        </p>
         <p v-if="bookings.length === 0" class="mt-4 text-xl tracking-widest text-ash">
           NEMAŠ REZERVACIJA
         </p>
@@ -269,6 +292,14 @@ async function logout(): Promise<void> {
             <p class="mt-1 text-lg tracking-widest text-ash">
               {{ b.barberName }} / {{ formatWhen(b.startsAt) }}
             </p>
+            <button
+              v-if="b.status === 'Pending' || b.status === 'Confirmed'"
+              type="button"
+              class="mt-3 w-full border border-line py-2 text-xl tracking-widest text-bone hover:border-alarm hover:text-alarm"
+              @click="cancelBooking(b)"
+            >
+              OTKAŽI
+            </button>
           </li>
         </ul>
         <button

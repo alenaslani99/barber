@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Barber.Application.UseCases;
 
-public sealed record UpdateBookingStatusCommand(Guid BookingId, Guid UserId, bool OwnerView, string Status);
+public sealed record UpdateBookingStatusCommand(Guid BookingId, Guid UserId, bool OwnerView, bool ClientView, string Status);
 
 public sealed class UpdateBookingStatusHandler(TenantContext db, AuditWriter audit)
 {
@@ -24,11 +24,16 @@ public sealed class UpdateBookingStatusHandler(TenantContext db, AuditWriter aud
 
         if (!command.OwnerView)
         {
-            bool owns = await db.Staff
+            bool ownsAsBarber = await db.Staff
                 .AsNoTracking()
                 .AnyAsync(s => s.Id == booking.StaffId && s.UserId == command.UserId && s.IsActive, ct);
-            if (!owns)
-                return null;
+            if (!ownsAsBarber)
+            {
+                if (!command.ClientView || booking.UserId != command.UserId)
+                    return null;
+                if (!string.Equals(command.Status, nameof(BookingStatus.Cancelled), StringComparison.OrdinalIgnoreCase))
+                    throw new BookingConflictException("Clients can only cancel their own bookings.");
+            }
         }
 
         if (!Enum.TryParse<BookingStatus>(command.Status, true, out BookingStatus next))

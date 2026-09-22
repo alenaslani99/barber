@@ -99,9 +99,8 @@ public sealed class BookingController(
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId))
             return Unauthorized();
         bool ownerView = User.IsInRole(nameof(UserRole.Owner));
-        if (!ownerView && !User.IsInRole(nameof(UserRole.Barber)))
-            return NotFound();
-        UpdateBookingStatusCommand command = new(id, userId, ownerView, request.Status);
+        bool clientView = !ownerView && !User.IsInRole(nameof(UserRole.Barber));
+        UpdateBookingStatusCommand command = new(id, userId, ownerView, clientView, request.Status);
         await statusValidator.ValidateAndThrowAsync(command, ct);
         BookingListItem? item = await changeStatus.HandleAsync(command, ct);
         if (item is null)

@@ -3,14 +3,13 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { api, ApiRequestError } from '../lib/api';
 import { BOOKING_DRAFT_KEY } from '../lib/draft';
-import { getNextDays, type TimeSlot } from '../data/mock';
+import { getNextDays } from '../data/mock';
 import {
-  fetchAvailability,
   type ApiBarber,
   type ApiService,
   type ApiShop,
-  type Availability,
 } from '../lib/catalog';
+import { useAvailability } from '../composables/useAvailability';
 import { useShopStore } from '../stores/shop';
 import BookingStepper from '../components/features/booking/BookingStepper.vue';
 import ShopHeader from '../components/layout/ShopHeader.vue';
@@ -81,55 +80,11 @@ const selectedBarber = computed(() => barbers.value.find((b) => b.id === barberI
 const selectedService = computed(
   () => services.value.find((s) => s.id === serviceId.value) ?? null,
 );
-const avail = ref<Availability | null>(null);
-const availLoading = ref(false);
-const availError = ref('');
-
-function toLocalIsoDay(d: Date): string {
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${m}-${day}`;
-}
-
-async function loadAvailability(): Promise<void> {
-  availError.value = '';
-  if (!barberId.value || !serviceId.value || !dateIso.value) {
-    avail.value = null;
-    return;
-  }
-  availLoading.value = true;
-  try {
-    avail.value = await fetchAvailability(barberId.value, dateIso.value, serviceId.value);
-  } catch {
-    avail.value = null;
-    availError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
-  } finally {
-    availLoading.value = false;
-  }
-}
-
-const slots = computed<TimeSlot[]>(() => {
-  if (!avail.value || avail.value.closed || !dateIso.value) return [];
-  const taken = new Set(avail.value.taken);
-  const [oh, om] = avail.value.open.split(':').map(Number);
-  const [ch, cm] = avail.value.close.split(':').map(Number);
-  const step = avail.value.slotMinutes > 0 ? avail.value.slotMinutes : 30;
-  const now = new Date();
-  const isToday = dateIso.value === toLocalIsoDay(now);
-  const [y, mo, d] = dateIso.value.split('-').map(Number);
-  const result: TimeSlot[] = [];
-  for (let m = oh * 60 + om; m + step <= ch * 60 + cm; m += step) {
-    const hh = String(Math.floor(m / 60)).padStart(2, '0');
-    const mm = String(m % 60).padStart(2, '0');
-    const time = `${hh}:${mm}`;
-    let available = !taken.has(time);
-    if (available && isToday) {
-      available = new Date(y, mo - 1, d, Number(hh), Number(mm)).getTime() > now.getTime();
-    }
-    result.push({ id: `${dateIso.value}-${time}`, time, available });
-  }
-  return result;
-});
+const { avail, slots, availLoading, availError, loadAvailability } = useAvailability(
+  barberId,
+  serviceId,
+  dateIso,
+);
 const dateLabel = computed(() => {
   const d = days.value.find((day) => day.iso === dateIso.value);
   return d ? `${d.weekday} ${d.dayNum} ${d.month}` : '';

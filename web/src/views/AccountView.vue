@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { api, ApiRequestError } from '../lib/api';
+import { formatWhen, statusLabel } from '../lib/bookings';
 import { useAuthStore } from '../stores/auth';
 import { useShopStore } from '../stores/shop';
 import UiInput from '../components/ui/UiInput.vue';
@@ -30,14 +31,6 @@ interface BookingsPage {
 type Validator = { validate: () => boolean; setError: (message: string) => void };
 type Tab = 'general' | 'history' | 'password';
 
-const STATUS_SR: Record<string, string> = {
-  Pending: 'NA ČEKANJU',
-  Confirmed: 'POTVRĐENA',
-  Cancelled: 'OTKAZANA',
-  Completed: 'ZAVRŠENA',
-  NoShow: 'NEDOLAZAK',
-};
-
 const PAGE_SIZE = 5;
 
 const auth = useAuthStore();
@@ -64,20 +57,6 @@ const newPwInput = useTemplateRef<Validator>('newPwInput');
 const confirmPwInput = useTemplateRef<Validator>('confirmPwInput');
 
 const canShowMore = computed(() => bookings.value.length < total.value);
-
-function statusLabel(status: string): string {
-  return STATUS_SR[status] ?? status.toUpperCase();
-}
-
-function formatWhen(iso: string): string {
-  return new Date(iso).toLocaleString('sr-Latn', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 async function loadHistory(): Promise<void> {
   loadingMore.value = true;

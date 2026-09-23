@@ -1,4 +1,4 @@
 namespace Barber.Application.Exceptions;
 
-public sealed class DuplicateEmailException(string email)
-    : Exception($"Email '{email}' is already registered.");
+public sealed class DuplicateEmailException()
+    : Exception("Email is already registered.");

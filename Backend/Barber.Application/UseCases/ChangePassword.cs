@@ -21,6 +21,11 @@ public sealed class ChangePasswordHandler(TenantContext db, IPasswordService pas
         }
 
         user.PasswordHash = passwords.HashPassword(user, command.NewPassword);
+        List<RefreshToken> sessions = await db.RefreshTokens
+            .Where(t => t.UserId == user.Id && t.RevokedAt == null)
+            .ToListAsync(ct);
+        foreach (RefreshToken token in sessions)
+            token.RevokedAt = DateTimeOffset.UtcNow;
         await db.SaveChangesAsync(ct);
         await audit.WriteAsync("auth.password_changed", user.Email, user.Id, ct: ct);
     }

@@ -21,10 +21,10 @@ public sealed class RegisterUserHandler(
     public async Task<AuthResult> HandleAsync(RegisterUserCommand command, CancellationToken ct = default)
     {
         if (await db.Users.AnyAsync(u => u.Email == command.Email, ct))
-            throw new DuplicateEmailException(command.Email);
+            throw new DuplicateEmailException();
 
         if (await db.Users.AnyAsync(u => u.Phone == command.Phone, ct))
-            throw new DuplicatePhoneException(command.Phone);
+            throw new DuplicatePhoneException();
 
         User user = new()
         {

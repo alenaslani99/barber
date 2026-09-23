@@ -1,4 +1,4 @@
 namespace Barber.Application.Exceptions;
 
-public sealed class DuplicatePhoneException(string phone)
-    : Exception($"Phone '{phone}' is already registered.");
+public sealed class DuplicatePhoneException()
+    : Exception("Phone is already registered.");

@@ -70,7 +70,11 @@ async function loadShop(): Promise<void> {
   catalogLoading.value = false;
 }
 
-const days = getNextDays(14);
+const closedDays = computed(() => {
+  if (!shop.value) return [0];
+  return shop.value.hours.filter((h) => h.closed).map((h) => h.day);
+});
+const days = computed(() => getNextDays(14, closedDays.value));
 
 const selectedBarber = computed(() => barbers.value.find((b) => b.id === barberId.value) ?? null);
 const selectedService = computed(
@@ -126,7 +130,7 @@ const slots = computed<TimeSlot[]>(() => {
   return result;
 });
 const dateLabel = computed(() => {
-  const d = days.find((day) => day.iso === dateIso.value);
+  const d = days.value.find((day) => day.iso === dateIso.value);
   return d ? `${d.weekday} ${d.dayNum} ${d.month}` : '';
 });
 

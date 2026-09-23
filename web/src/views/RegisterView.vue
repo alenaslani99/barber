@@ -99,6 +99,10 @@ async function submit(): Promise<void> {
         applyFieldErrors(error.errors);
         return;
       }
+      if (error.status === 429) {
+        formError.value = 'PREVIŠE POKUŠAJA, POKUŠAJ KASNIJE';
+        return;
+      }
     }
     formError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
   } finally {

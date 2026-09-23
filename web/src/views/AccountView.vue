@@ -57,7 +57,6 @@ const currentPw = ref('');
 const newPw = ref('');
 const confirmPw = ref('');
 const pwLoading = ref(false);
-const pwSuccess = ref('');
 const pwError = ref('');
 
 const currentPwInput = useTemplateRef<Validator>('currentPwInput');
@@ -118,9 +117,9 @@ onMounted(async () => {
 });
 
 async function changePassword(): Promise<void> {
-  pwSuccess.value = '';
   pwError.value = '';
-  const currentOk = currentPwInput.value?.validate() ?? false;
+    pwError.value = '';
+    const currentOk = currentPwInput.value?.validate() ?? false;
   const newOk = newPwInput.value?.validate() ?? false;
   const confirmOk = confirmPwInput.value?.validate() ?? false;
   if (!currentOk || !newOk || !confirmOk) return;
@@ -131,10 +130,8 @@ async function changePassword(): Promise<void> {
       token: auth.accessToken,
       body: { currentPassword: currentPw.value, newPassword: newPw.value },
     });
-    pwSuccess.value = 'LOZINKA PROMENJENA';
-    currentPw.value = '';
-    newPw.value = '';
-    confirmPw.value = '';
+    await auth.logout();
+    await router.push('/login');
   } catch (error) {
     if (error instanceof ApiRequestError && error.status === 401) {
       currentPwInput.value?.setError('TRENUTNA LOZINKA NIJE ISPRAVNA');
@@ -355,13 +352,6 @@ async function cancelBooking(b: MyBooking): Promise<void> {
               ]"
             />
           </div>
-          <p
-            v-if="pwSuccess"
-            role="status"
-            class="mt-4 border border-bone p-3 text-center text-lg tracking-widest text-bone"
-          >
-            {{ pwSuccess }}
-          </p>
           <p
             v-if="pwError"
             role="alert"

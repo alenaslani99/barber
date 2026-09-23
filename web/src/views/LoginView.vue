@@ -57,6 +57,8 @@ async function submit(): Promise<void> {
   } catch (error) {
     if (error instanceof ApiRequestError && error.status === 401) {
       formError.value = 'POGREŠAN EMAIL ILI LOZINKA';
+    } else if (error instanceof ApiRequestError && error.status === 429) {
+      formError.value = 'PREVIŠE POKUŠAJA, POKUŠAJ KASNIJE';
     } else {
       formError.value = 'GREŠKA U VEZI, POKUŠAJ PONOVO';
     }

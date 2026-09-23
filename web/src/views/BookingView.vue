@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { api, ApiRequestError } from '../lib/api';
+import { BOOKING_DRAFT_KEY } from '../lib/draft';
 import { getNextDays, type TimeSlot } from '../data/mock';
 import {
   fetchAvailability,
@@ -29,7 +30,7 @@ interface BookingDraft {
   step: number;
 }
 
-const DRAFT_KEY = 'barber.booking.draft';
+const DRAFT_KEY = BOOKING_DRAFT_KEY;
 
 const auth = useAuthStore();
 const router = useRouter();

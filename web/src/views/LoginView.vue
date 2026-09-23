@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { safeNextPath } from '../lib/navigation';
 import AuthLayout from '../components/layout/AuthLayout.vue';
 import UiCheckbox from '../components/ui/UiCheckbox.vue';
 import UiInput from '../components/ui/UiInput.vue';
@@ -52,7 +53,7 @@ async function submit(): Promise<void> {
     await auth.login(email.value, password.value);
     if (remember.value) localStorage.setItem(REMEMBER_KEY, email.value);
     else localStorage.removeItem(REMEMBER_KEY);
-    const next = typeof route.query.next === 'string' ? route.query.next : '/';
+    const next = safeNextPath(route.query.next);
     await router.push(next);
   } catch (error) {
     if (error instanceof ApiRequestError && error.status === 401) {

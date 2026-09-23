@@ -62,6 +62,7 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
       method: options.method ?? 'GET',
       headers,
       credentials: 'include',
+      signal: AbortSignal.timeout(15000),
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
     });
   } catch {

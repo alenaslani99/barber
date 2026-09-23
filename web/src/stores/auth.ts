@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { api, ApiRequestError } from '../lib/api';
+import { clearBookingDrafts } from '../lib/draft';
 
 export interface SessionResponse {
   accessToken: string;
@@ -157,6 +158,7 @@ export const useAuthStore = defineStore('auth', () => {
       // Clear locally regardless of server result.
     } finally {
       clearSession();
+      clearBookingDrafts();
     }
   }
 

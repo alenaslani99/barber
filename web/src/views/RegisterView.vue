@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { safeNextPath } from '../lib/navigation';
 import AuthLayout from '../components/layout/AuthLayout.vue';
 import UiInput from '../components/ui/UiInput.vue';
 import { ApiRequestError } from '../lib/api';
@@ -53,13 +54,13 @@ const confirmRules = [
 function applyFieldErrors(errors: Record<string, string[]>): void {
   const leftovers: string[] = [];
   for (const key of Object.keys(errors)) {
-    const message = errors[key]?.[0] ?? 'NEISPRAVAN UNOS';
-    if (key === 'Email') emailInput.value?.setError(message);
-    else if (key === 'Phone') phoneInput.value?.setError(message);
-    else if (key === 'Password') passwordInput.value?.setError(message);
-    else if (key === 'FirstName') firstNameInput.value?.setError(message);
-    else if (key === 'LastName') lastNameInput.value?.setError(message);
-    else leftovers.push(message);
+    if (!errors[key]?.length) continue;
+    if (key === 'Email') emailInput.value?.setError('UNESI ISPRAVAN EMAIL');
+    else if (key === 'Phone') phoneInput.value?.setError('UNESI ISPRAVAN TELEFON');
+    else if (key === 'Password') passwordInput.value?.setError('MIN 8 KARAKTERA');
+    else if (key === 'FirstName') firstNameInput.value?.setError('IME JE OBAVEZNO');
+    else if (key === 'LastName') lastNameInput.value?.setError('PREZIME JE OBAVEZNO');
+    else leftovers.push('NEISPRAVAN UNOS');
   }
   if (leftovers.length > 0) formError.value = leftovers.join(' / ');
 }
@@ -84,7 +85,7 @@ async function submit(): Promise<void> {
       phone: phone.value,
       password: password.value,
     });
-    const next = typeof route.query.next === 'string' ? route.query.next : '/';
+    const next = safeNextPath(route.query.next);
     await router.push(next);
   } catch (error) {
     if (error instanceof ApiRequestError) {

@@ -6,6 +6,7 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { useAuthStore } from '@/src/stores/auth';
 
 import { useColorScheme } from '@/components/useColorScheme';
 
@@ -26,6 +27,11 @@ export default function RootLayout() {
     BebasNeue_400Regular,
     Inter_400Regular,
   });
+  const boot = useAuthStore((s) => s.boot);
+
+  useEffect(() => {
+    void boot();
+  }, [boot]);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {

@@ -16,6 +16,7 @@ module.exports = {
         ash: '#A1A1A1',
         line: '#262626',
         blaze: '#FF5C00',
+        blue: '#3A86FF',
         alarm: '#FF4D4D',
       },
       fontFamily: {

@@ -5,5 +5,5 @@ export default function Index() {
   const hydrated = useAuthStore((s) => s.hydrated);
   const accessToken = useAuthStore((s) => s.accessToken);
   if (!hydrated) return null;
-  return <Redirect href={accessToken ? '/hello' : '/login'} />;
+  return <Redirect href={accessToken ? '/booking' : '/login'} />;
 }

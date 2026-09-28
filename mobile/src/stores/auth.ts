@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api, ApiRequestError } from '../lib/api';
+import { clearUserCache } from '../lib/cache';
 import { decodePayload, payloadDisplayName, payloadRole } from '../lib/token';
 
 export interface SessionResponse {
@@ -123,6 +124,8 @@ export const useAuthStore = create<AuthState>()((set, get) => {
     hydrated: false,
 
     login: async (userEmail: string, userPassword: string): Promise<void> => {
+      // Fresh account context — never reuse the previous user's cached data.
+      await clearUserCache();
       const session = await api<SessionResponse>('/api/auth/login', {
         method: 'POST',
         auth: false,
@@ -132,6 +135,7 @@ export const useAuthStore = create<AuthState>()((set, get) => {
     },
 
     register: async (payload: RegisterPayload): Promise<void> => {
+      await clearUserCache();
       const session = await api<SessionResponse>('/api/auth/register', {
         method: 'POST',
         auth: false,
@@ -168,6 +172,7 @@ export const useAuthStore = create<AuthState>()((set, get) => {
         // Clear locally regardless of server result.
       } finally {
         clearSession();
+        await clearUserCache();
       }
     },
 

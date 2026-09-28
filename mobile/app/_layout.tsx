@@ -56,7 +56,9 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack />
+      <Stack
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#080808' } }}
+      />
     </ThemeProvider>
   );
 }

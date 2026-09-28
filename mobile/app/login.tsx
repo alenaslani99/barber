@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { UiInput, type UiInputHandle } from '@/components/ui/UiInput';
-import { ShopFooter } from '@/components/layout/ShopFooter';
 import { ApiRequestError } from '@/src/lib/api';
 import { safeNextPath } from '@/src/lib/navigation';
 import { useAuthStore } from '@/src/stores/auth';
@@ -33,7 +32,7 @@ export default function Login() {
       // Session persists in SecureStore on every login — no remember checkbox
       // on mobile. Logout is explicit only.
       await login(email, password);
-      router.replace(safeNextPath(params.next) as '/');
+      router.replace(safeNextPath(params.next) as '/booking');
     } catch (error) {
       if (error instanceof ApiRequestError && error.status === 401) {
         setFormError('POGREŠAN EMAIL ILI LOZINKA');
@@ -108,12 +107,11 @@ export default function Login() {
             </View>
             <Text className="mt-6 text-center font-display text-lg uppercase tracking-widest text-ash">
               NEMAŠ NALOG?{' '}
-              <Link href="/register" className="text-blaze">
+              <Link href="/register" className="text-blue">
                 REGISTRUJ SE
               </Link>
             </Text>
           </View>
-          <ShopFooter />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

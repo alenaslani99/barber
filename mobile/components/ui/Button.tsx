@@ -1,6 +1,6 @@
 import { Pressable, Text } from 'react-native';
 
-type ButtonVariant = 'bone' | 'blaze' | 'outline';
+type ButtonVariant = 'bone' | 'blaze' | 'outline' | 'danger';
 
 interface ButtonProps {
   title: string;
@@ -15,11 +15,15 @@ export function Button({ title, onPress, variant = 'bone', disabled = false }: B
       ? 'w-full bg-bone py-3'
       : variant === 'blaze'
         ? 'w-full bg-blaze py-3'
-        : 'w-full border border-line bg-transparent py-3';
+        : variant === 'danger'
+          ? 'w-full border border-alarm bg-transparent py-3'
+          : 'w-full border border-line bg-transparent py-3';
   const label =
     variant === 'outline'
       ? 'text-center font-display text-2xl uppercase tracking-widest text-bone'
-      : 'text-center font-display text-2xl uppercase tracking-widest text-ink';
+      : variant === 'danger'
+        ? 'text-center font-display text-2xl uppercase tracking-widest text-alarm'
+        : 'text-center font-display text-2xl uppercase tracking-widest text-ink';
   return (
     <Pressable
       accessibilityRole="button"

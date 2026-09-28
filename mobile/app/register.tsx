@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { UiInput, type UiInputHandle } from '@/components/ui/UiInput';
-import { ShopFooter } from '@/components/layout/ShopFooter';
 import { ApiRequestError } from '@/src/lib/api';
 import { safeNextPath } from '@/src/lib/navigation';
 import { useAuthStore } from '@/src/stores/auth';
@@ -46,7 +45,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register({ firstName, lastName, email, phone, password });
-      router.replace(safeNextPath(params.next) as '/');
+      router.replace(safeNextPath(params.next) as '/booking');
     } catch (error) {
       if (error instanceof ApiRequestError) {
         if (error.status === 409) {
@@ -200,12 +199,11 @@ export default function Register() {
           </View>
           <Text className="mt-6 text-center font-display text-lg uppercase tracking-widest text-ash">
             IMAŠ NALOG?{' '}
-            <Link href="/login" className="text-blaze">
+            <Link href="/login" className="text-blue">
               PRIJAVI SE
             </Link>
           </Text>
         </View>
-        <ShopFooter />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

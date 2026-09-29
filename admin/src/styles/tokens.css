@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand — Bootstrap primary darkened for enterprise contrast */
+  --color-brand: #1a4fa0;
+  --color-brand-hover: #143c80;
+  --color-brand-soft: #e8f0fb;
+
+  /* Sidebar — dark navy */
+  --color-sidebar: #131d31;
+  --color-sidebar-hover: #1d2c48;
+  --color-sidebar-active: #1a4fa0;
+  --color-sidebar-text: #94a3b8;
+  --color-sidebar-text-active: #ffffff;
+
+  /* Surfaces */
+  --color-canvas: #f1f4f9;
+  --color-surface: #ffffff;
+  --color-line: #d8e0ec;
+  --color-line-strong: #b9c6da;
+
+  /* Text */
+  --color-ink: #16202e;
+  --color-muted: #64748b;
+
+  /* Status */
+  --color-success: #15803d;
+  --color-success-soft: #e7f6ec;
+  --color-warning: #b45309;
+  --color-warning-soft: #fdf3e3;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fdeaea;
+
+  /* Typography — Inter Variable primary, JetBrains Mono for machine values.
+     Self-hosted via Fontsource; the system stacks behind them are fallbacks
+     only, so text still renders if the woff2 fails to load. */
+  --font-sans:
+    "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+
+  /* Shape — small, Bootstrap-ish. NOT web/'s rounded-none. */
+  --radius-card: 4px;
+  --radius-field: 4px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-[14px] leading-5 text-ink antialiased;
+  }
+
+  /* Visible focus everywhere, never removed.
+     Inputs opt out below — a border-hugging ring reads better on a field
+     than a detached outline slab. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand;
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline-none;
+  }
+
+  ::selection {
+    @apply bg-brand-soft text-ink;
+  }
+}
+
+@layer utilities {
+  /* Dense ERP table rules */
+  .erp-table {
+    @apply w-full border-collapse text-left text-[13px];
+  }
+
+  .erp-table th {
+    @apply border-b border-line bg-canvas px-4 py-2.5 text-[11px] font-semibold tracking-wider text-muted uppercase;
+  }
+
+  .erp-table td {
+    @apply border-b border-line px-4 py-3 align-middle;
+  }
+
+  .erp-table tbody tr:hover {
+    @apply bg-brand-soft/40;
+  }
+}

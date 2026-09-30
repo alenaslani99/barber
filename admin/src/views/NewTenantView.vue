@@ -7,10 +7,18 @@ import UiButton from '../components/ui/UiButton.vue';
 import UiCard from '../components/ui/UiCard.vue';
 import UiInput from '../components/ui/UiInput.vue';
 import UiPageHeader from '../components/ui/UiPageHeader.vue';
+import UiSpinner from '../components/ui/UiSpinner.vue';
+import { ApiError } from '../lib/api';
+import { createTenant } from '../lib/tenants';
 import { useTenantStore } from '../stores/tenant';
 
 const router = useRouter();
 const { setSlug } = useTenantStore();
+
+const slugInput = ref<InstanceType<typeof UiInput> | null>(null);
+const databaseInput = ref<InstanceType<typeof UiInput> | null>(null);
+const submitting = ref(false);
+const failure = ref('');
 
 const slug = ref('');
 const databaseName = ref('');
@@ -39,10 +47,29 @@ watch(databaseName, (value) => {
   dbValid.value = DB_RULE.test(value.trim());
 });
 
-function continueToShop(): void {
+async function createAndContinue(): Promise<void> {
+  const slugOk = slugInput.value?.validate() ?? false;
+  const dbOk = databaseInput.value?.validate() ?? false;
+  if (!slugOk || !dbOk) return;
+
   const clean = slug.value.trim().toLowerCase();
-  setSlug(clean);
-  router.push(`/tenants/${clean}/shop`);
+  submitting.value = true;
+  failure.value = '';
+  try {
+    const tenant = await createTenant(clean, databaseName.value.trim());
+    setSlug(tenant.slug);
+    await router.push(`/tenants/${tenant.slug}/shop`);
+  } catch (error) {
+    if (!(error instanceof ApiError)) throw error;
+    // Field-level validation (400) lands on the inputs; everything else is a banner.
+    const slugError = error.errors.Slug?.[0];
+    const dbError = error.errors.DatabaseName?.[0];
+    if (slugError) slugInput.value?.setError(slugError);
+    if (dbError) databaseInput.value?.setError(dbError);
+    if (!slugError && !dbError) failure.value = error.title;
+  } finally {
+    submitting.value = false;
+  }
 }
 </script>
 
@@ -57,8 +84,13 @@ function continueToShop(): void {
       <div class="lg:col-span-2">
         <UiCard title="Tenant identity" description="Slug and target database.">
           <div class="space-y-5">
+            <UiAlert v-if="failure" tone="danger" title="Tenant not created">
+              {{ failure }}
+            </UiAlert>
+
             <UiInput
               id="slug"
+              ref="slugInput"
               v-model="slug"
               label="Slug"
               placeholder="e.g. demo"
@@ -72,6 +104,7 @@ function continueToShop(): void {
 
             <UiInput
               id="database"
+              ref="databaseInput"
               v-model="databaseName"
               label="Database name"
               placeholder="barber_t_demo"
@@ -84,9 +117,16 @@ function continueToShop(): void {
             />
 
             <div class="flex flex-wrap gap-2">
-              <UiButton :disabled="!slugValid || !dbValid" @click="continueToShop">
-                <template #icon><Database class="size-4" aria-hidden="true" /></template>
-                Create and continue
+              <UiButton
+                :disabled="!slugValid || !dbValid"
+                :loading="submitting"
+                @click="createAndContinue"
+              >
+                <template #icon>
+                  <UiSpinner v-if="submitting" class="size-4" />
+                  <Database v-else class="size-4" aria-hidden="true" />
+                </template>
+                {{ submitting ? 'Creating database…' : 'Create and continue' }}
               </UiButton>
             </div>
           </div>

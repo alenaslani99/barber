@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch, type Ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch, type Ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import { Scissors, UserPlus, Users, X } from '@lucide/vue';
+import { UserPlus, Users, X } from '@lucide/vue';
 import CredentialsCard from '../components/features/onboarding/CredentialsCard.vue';
+import ServicesPanel from '../components/features/onboarding/ServicesPanel.vue';
 import StepShell from '../components/features/onboarding/StepShell.vue';
 import UiAlert from '../components/ui/UiAlert.vue';
 import UiBadge from '../components/ui/UiBadge.vue';
@@ -58,6 +59,8 @@ const failure = ref('');
 const shopMissing = ref(false);
 const seniorities = ref<Seniority[]>([]);
 const staff = ref<StaffAccount[]>([]);
+const serviceCount = ref(0);
+const bookable = computed(() => staff.value.length > 0 && serviceCount.value > 0);
 // Latest created barber only; lives in this component and is never persisted.
 const credentials = ref<Credentials | null>(null);
 
@@ -151,6 +154,10 @@ async function submit(): Promise<void> {
             {{ staff.length }} {{ staff.length === 1 ? 'barber' : 'barbers' }}
           </UiBadge>
           <UiBadge v-else tone="warning">No staff</UiBadge>
+          <UiBadge v-if="serviceCount > 0" tone="success" dot class="ml-2">
+            {{ serviceCount }} {{ serviceCount === 1 ? 'service' : 'services' }}
+          </UiBadge>
+          <UiBadge v-else tone="warning" class="ml-2">No services</UiBadge>
         </div>
       </template>
     </UiPageHeader>
@@ -301,17 +308,20 @@ async function submit(): Promise<void> {
                 </table>
               </div>
             </UiCard>
+
+            <ServicesPanel :slug="slug" :disabled="shopMissing" @count="serviceCount = $event" />
           </div>
 
           <div class="space-y-4">
-            <UiCard title="Services">
-              <template #actions>
-                <Scissors class="size-4 text-muted" aria-hidden="true" />
-              </template>
-              <p class="py-4 text-center text-[13px] text-muted">
-                Service setup lands in the next pass.
-              </p>
-            </UiCard>
+            <UiAlert v-if="bookable" tone="success" title="Shop is bookable">
+              At least one barber and one service are set up.
+              <RouterLink to="/tenants" class="font-semibold text-brand underline">
+                Back to all clients
+              </RouterLink>
+            </UiAlert>
+            <UiAlert v-else-if="!loading" tone="warning" title="Not bookable yet">
+              Clients can book once there is at least one barber and one service.
+            </UiAlert>
             <UiAlert tone="info" title="Passwords">
               Each barber gets a generated password, shown once. Hand it over together with
               the email the owner gave you.

@@ -115,3 +115,22 @@ export function getStaff(slug: string): Promise<StaffAccount[]> {
 export function createBarber(slug: string, input: BarberInput): Promise<Credentials> {
   return api<Credentials>(tenantPath(slug, 'staff'), { method: 'POST', body: input });
 }
+
+export interface ShopService {
+  id: string;
+  name: string;
+  price: number;
+  durationMinutes: number;
+  slotMinutes: number;
+  isActive: boolean;
+}
+
+export type ShopServiceInput = Pick<ShopService, 'name' | 'price' | 'durationMinutes' | 'slotMinutes'>;
+
+export function getServices(slug: string): Promise<ShopService[]> {
+  return api<ShopService[]>(tenantPath(slug, 'services'));
+}
+
+export function createService(slug: string, input: ShopServiceInput): Promise<ShopService> {
+  return api<ShopService>(tenantPath(slug, 'services'), { method: 'POST', body: input });
+}

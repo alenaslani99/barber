@@ -87,12 +87,12 @@ public sealed class RequestValidationExceptionHandler : IExceptionHandler
     }
 }
 
-public sealed class DuplicateTenantExceptionHandler : IExceptionHandler
+public sealed class ConflictExceptionHandler : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext, Exception exception, CancellationToken ct)
     {
-        if (exception is not DuplicateTenantException)
+        if (exception is not ConflictException)
             return false;
 
         httpContext.Response.StatusCode = StatusCodes.Status409Conflict;

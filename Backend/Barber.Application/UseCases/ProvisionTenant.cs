@@ -21,10 +21,10 @@ public sealed class ProvisionTenantHandler(
     public async Task<TenantResult> HandleAsync(ProvisionTenantCommand command, CancellationToken ct = default)
     {
         if (await catalog.Tenants.AnyAsync(t => t.Slug == command.Slug, ct))
-            throw new DuplicateTenantException($"Slug '{command.Slug}' is already taken.");
+            throw new ConflictException($"Slug '{command.Slug}' is already taken.");
 
         if (await catalog.Tenants.AnyAsync(t => t.DatabaseName == command.DatabaseName, ct))
-            throw new DuplicateTenantException($"Database '{command.DatabaseName}' is already used by another tenant.");
+            throw new ConflictException($"Database '{command.DatabaseName}' is already used by another tenant.");
 
         // Raw SQL: pg_database is a Postgres system catalog with no EF model. Guards against
         // migrating into (and later dropping) a database that exists outside the catalog.
@@ -32,7 +32,7 @@ public sealed class ProvisionTenantHandler(
             .SqlQuery<int>($"SELECT 1 AS \"Value\" FROM pg_database WHERE datname = {command.DatabaseName}")
             .AnyAsync(ct);
         if (databaseExists)
-            throw new DuplicateTenantException($"Database '{command.DatabaseName}' already exists on the server.");
+            throw new ConflictException($"Database '{command.DatabaseName}' already exists on the server.");
 
         await using TenantContext tenantDb = databases.Open(command.DatabaseName);
         try

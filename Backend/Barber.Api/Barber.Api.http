@@ -137,3 +137,25 @@ Content-Type: application/json
 ### Admin: tenant setup progress
 GET http://localhost:5118/api/admin/tenants/acme
 X-Admin-Key: dev-admin-key-not-for-production
+
+### Admin: create or update the shop (first call also sets Mon-Sat 09:00-19:00)
+PUT http://localhost:5118/api/admin/tenants/acme/shop
+X-Admin-Key: dev-admin-key-not-for-production
+Content-Type: application/json
+
+{"name":"Acme Barbers","address":"Zeil 1, 60313 Frankfurt","phone":"+49691234567","tagline":"Fresh cuts","description":"","timeZone":"Europe/Berlin"}
+
+### Admin: get shop details
+GET http://localhost:5118/api/admin/tenants/acme/shop
+X-Admin-Key: dev-admin-key-not-for-production
+
+### Admin: create owner (password is only in this response)
+POST http://localhost:5118/api/admin/tenants/acme/owner
+X-Admin-Key: dev-admin-key-not-for-production
+Content-Type: application/json
+
+{"firstName":"Max","lastName":"Muster","email":"owner@acme.shop","phone":"+491701234567"}
+
+### Admin: get owner (no password)
+GET http://localhost:5118/api/admin/tenants/acme/owner
+X-Admin-Key: dev-admin-key-not-for-production

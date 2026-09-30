@@ -6,6 +6,9 @@ namespace Barber.Application.Logging;
 
 public sealed class AuditWriter(TenantContext db, IHttpContextAccessor http)
 {
+    /// <summary>Actor recorded for changes made through the local admin app.</summary>
+    public const string AdminActor = "admin";
+
     public async Task WriteAsync(
         string action,
         string email,

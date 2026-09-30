@@ -8,6 +8,7 @@ namespace Barber.Api.Core;
 public sealed class TenantProvider : ITenantProvider
 {
     public const string HeaderName = "X-Tenant-Slug";
+    public const string RouteKey = "tenantSlug";
     private static readonly TimeSpan CacheLifetime = TimeSpan.FromMinutes(1);
 
     private readonly IHttpContextAccessor _http;
@@ -32,17 +33,32 @@ public sealed class TenantProvider : ITenantProvider
 
     public string GetSlug()
     {
-        string? slug = _http.HttpContext?.Request.Headers[HeaderName].ToString();
+        string? slug = ResolveSlug();
         if (string.IsNullOrWhiteSpace(slug))
             throw new TenantNotFoundException(slug ?? string.Empty);
         return slug;
     }
 
+    /// <summary>
+    /// Client apps send the slug as a header. Admin routes carry it in the path as
+    /// <c>{tenantSlug}</c> instead, so the regular tenant handlers work unchanged there.
+    /// </summary>
+    private string? ResolveSlug()
+    {
+        HttpContext? context = _http.HttpContext;
+        if (context is null)
+            return null;
+
+        string header = context.Request.Headers[HeaderName].ToString();
+        if (!string.IsNullOrWhiteSpace(header))
+            return header;
+
+        return context.GetRouteValue(RouteKey) as string;
+    }
+
     private Tenant GetTenant()
     {
-        string? slug = _http.HttpContext?.Request.Headers[HeaderName].ToString();
-        if (string.IsNullOrWhiteSpace(slug))
-            throw new TenantNotFoundException(slug ?? string.Empty);
+        string slug = GetSlug();
 
         Tenant tenant = _cache.GetOrCreate($"tenant:{slug}", entry =>
         {

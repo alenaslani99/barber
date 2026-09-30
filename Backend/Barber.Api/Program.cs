@@ -44,7 +44,9 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddDataAccess(
     builder.Configuration.GetConnectionString("Catalog")
-        ?? throw new InvalidOperationException("Missing ConnectionStrings:Catalog."));
+        ?? throw new InvalidOperationException("Missing ConnectionStrings:Catalog."),
+    builder.Configuration.GetConnectionString("TenantTemplate")
+        ?? throw new InvalidOperationException("Missing ConnectionStrings:TenantTemplate."));
 builder.Services.AddApplication();
 
 JwtSettings jwt = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
@@ -70,6 +72,7 @@ builder.Services.AddExceptionHandler<TenantNotFoundExceptionHandler>();
 builder.Services.AddExceptionHandler<AuthenticationExceptionHandler>();
 builder.Services.AddExceptionHandler<DuplicateEmailExceptionHandler>();
 builder.Services.AddExceptionHandler<DuplicatePhoneExceptionHandler>();
+builder.Services.AddExceptionHandler<DuplicateTenantExceptionHandler>();
 builder.Services.AddExceptionHandler<BookingConflictExceptionHandler>();
 builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
 builder.Services.AddExceptionHandler<RequestValidationExceptionHandler>();

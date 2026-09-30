@@ -33,6 +33,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<UpdateWorkingHoursHandler>();
         services.AddScoped<CreateBookingHandler>();
         services.AddScoped<ChangePasswordHandler>();
+        services.AddScoped<ProvisionTenantHandler>();
+        services.AddScoped<GetTenantsHandler>();
+        services.AddScoped<GetTenantSetupHandler>();
         services.AddScoped<AuditWriter>();
         services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
         return services;

@@ -122,3 +122,18 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMjRkN2FiY
 Content-Type: application/json
 
 {"email":"staff@demo.shop","barbershopId":"73f1e611-9f30-48d2-8ce6-531610f6f676","seniorityId":"22222222-2222-2222-2222-222222222222"}
+
+### Admin: list tenants (Development only, needs X-Admin-Key)
+GET http://localhost:5118/api/admin/tenants
+X-Admin-Key: dev-admin-key-not-for-production
+
+### Admin: provision tenant (creates DB, migrates, registers in catalog)
+POST http://localhost:5118/api/admin/tenants
+X-Admin-Key: dev-admin-key-not-for-production
+Content-Type: application/json
+
+{"slug":"acme","databaseName":"barber_t_acme"}
+
+### Admin: tenant setup progress
+GET http://localhost:5118/api/admin/tenants/acme
+X-Admin-Key: dev-admin-key-not-for-production

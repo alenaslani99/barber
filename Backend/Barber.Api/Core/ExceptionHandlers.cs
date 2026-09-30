@@ -87,6 +87,21 @@ public sealed class RequestValidationExceptionHandler : IExceptionHandler
     }
 }
 
+public sealed class DuplicateTenantExceptionHandler : IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext httpContext, Exception exception, CancellationToken ct)
+    {
+        if (exception is not DuplicateTenantException)
+            return false;
+
+        httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+        await httpContext.Response.WriteAsJsonAsync(
+            new ProblemDetails { Title = exception.Message, Status = StatusCodes.Status409Conflict }, ct);
+        return true;
+    }
+}
+
 public sealed class BookingConflictExceptionHandler : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(

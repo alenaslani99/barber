@@ -5,11 +5,15 @@ namespace Barber.DataAccess;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDataAccess(this IServiceCollection services, string catalogConnectionString)
+    public static IServiceCollection AddDataAccess(
+        this IServiceCollection services,
+        string catalogConnectionString,
+        string tenantTemplateConnectionString)
     {
         services.AddDbContext<CatalogContext>(o => o.UseNpgsql(catalogConnectionString));
         services.AddDbContext<TenantContext>((sp, o) =>
             o.UseNpgsql(sp.GetRequiredService<ITenantProvider>().GetConnectionString()));
+        services.AddSingleton(new TenantDatabases(tenantTemplateConnectionString));
         return services;
     }
 }

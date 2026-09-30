@@ -174,3 +174,14 @@ X-Admin-Key: dev-admin-key-not-for-production
 Content-Type: application/json
 
 {"firstName":"Luka","lastName":"Horvat","email":"luka@acme.shop","phone":"+491707654321","seniorityId":"33333333-3333-3333-3333-333333333333"}
+
+### Admin: list services (including inactive)
+GET http://localhost:5118/api/admin/tenants/acme/services
+X-Admin-Key: dev-admin-key-not-for-production
+
+### Admin: add service (slotMinutes optional, defaults to 30)
+POST http://localhost:5118/api/admin/tenants/acme/services
+X-Admin-Key: dev-admin-key-not-for-production
+Content-Type: application/json
+
+{"name":"Haircut","price":25.00,"durationMinutes":30,"slotMinutes":30}

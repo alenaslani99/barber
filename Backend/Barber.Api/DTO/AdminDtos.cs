@@ -31,6 +31,7 @@ public sealed record StaffAccountResponse(
     string Phone,
     string Seniority,
     bool IsActive);
+public sealed record CreateShopServiceRequest(string Name, decimal Price, int DurationMinutes, int? SlotMinutes);
 public sealed record TenantSetupResponse(
     TenantResponse Tenant,
     bool HasShop,

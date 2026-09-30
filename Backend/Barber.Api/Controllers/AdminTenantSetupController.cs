@@ -22,11 +22,15 @@ public sealed class AdminTenantSetupController(
     GetSenioritiesHandler getSeniorities,
     GetStaffAccountsHandler getStaff,
     CreateBarberAccountHandler createBarber,
+    GetShopServicesHandler getServices,
+    CreateShopServiceHandler createService,
+    IValidator<CreateShopServiceCommand> serviceValidator,
     IValidator<UpsertShopCommand> shopValidator,
     IValidator<CreateOwnerCommand> ownerValidator,
     IValidator<CreateBarberAccountCommand> barberValidator) : ControllerBase
 {
     private const string DefaultTimeZone = "Europe/Berlin";
+    private const int DefaultSlotMinutes = 30;
 
     [HttpGet("shop")]
     [EndpointSummary("Get the tenant's barbershop details.")]
@@ -140,6 +144,39 @@ public sealed class AdminTenantSetupController(
             new { tenantSlug = RouteData.Values[TenantProvider.RouteKey] },
             new CredentialsResponse(result.UserId, result.FirstName, result.LastName, result.Email, result.Password));
     }
+
+    [HttpGet("services")]
+    [EndpointSummary("List every service, including inactive ones.")]
+    [ProducesResponseType<List<ServiceDetailResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<List<ServiceDetailResponse>>> GetServices(CancellationToken ct)
+    {
+        List<ServiceDetailResult> items = await getServices.HandleAsync(ct);
+        return Ok(items.Select(ToResponse).ToList());
+    }
+
+    [HttpPost("services")]
+    [EndpointSummary("Add a service to the shop. Slot length defaults to 30 minutes.")]
+    [ProducesResponseType<ServiceDetailResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<ServiceDetailResponse>> CreateService(
+        CreateShopServiceRequest request, CancellationToken ct)
+    {
+        CreateShopServiceCommand command = new(
+            request.Name.Trim(), request.Price, request.DurationMinutes, request.SlotMinutes ?? DefaultSlotMinutes);
+        await serviceValidator.ValidateAndThrowAsync(command, ct);
+        ServiceDetailResult result = await createService.HandleAsync(command, ct);
+        return CreatedAtAction(
+            nameof(GetServices),
+            new { tenantSlug = RouteData.Values[TenantProvider.RouteKey] },
+            ToResponse(result));
+    }
+
+    private static ServiceDetailResponse ToResponse(ServiceDetailResult s) =>
+        new(s.Id, s.Name, s.Price, s.DurationMinutes, s.SlotMinutes, s.IsActive);
 
     private static ShopDetailsResponse ToResponse(ShopDetailsResult s) =>
         new(s.Id, s.Name, s.Address, s.Phone, s.Tagline, s.Description, s.TimeZone);

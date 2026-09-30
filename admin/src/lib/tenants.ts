@@ -78,3 +78,40 @@ export function getOwner(slug: string): Promise<Owner> {
 export function createOwner(slug: string, input: OwnerInput): Promise<Credentials> {
   return api<Credentials>(tenantPath(slug, 'owner'), { method: 'POST', body: input });
 }
+
+export interface Seniority {
+  id: string;
+  name: string;
+  level: number;
+}
+
+export interface StaffAccount {
+  id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  seniority: string;
+  isActive: boolean;
+}
+
+export interface BarberInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  seniorityId: string | null;
+}
+
+export function getSeniorities(slug: string): Promise<Seniority[]> {
+  return api<Seniority[]>(tenantPath(slug, 'seniorities'));
+}
+
+export function getStaff(slug: string): Promise<StaffAccount[]> {
+  return api<StaffAccount[]>(tenantPath(slug, 'staff'));
+}
+
+export function createBarber(slug: string, input: BarberInput): Promise<Credentials> {
+  return api<Credentials>(tenantPath(slug, 'staff'), { method: 'POST', body: input });
+}

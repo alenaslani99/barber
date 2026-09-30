@@ -19,8 +19,12 @@ public sealed class AdminTenantSetupController(
     UpsertShopHandler upsertShop,
     GetOwnerHandler getOwner,
     CreateOwnerHandler createOwner,
+    GetSenioritiesHandler getSeniorities,
+    GetStaffAccountsHandler getStaff,
+    CreateBarberAccountHandler createBarber,
     IValidator<UpsertShopCommand> shopValidator,
-    IValidator<CreateOwnerCommand> ownerValidator) : ControllerBase
+    IValidator<CreateOwnerCommand> ownerValidator,
+    IValidator<CreateBarberAccountCommand> barberValidator) : ControllerBase
 {
     private const string DefaultTimeZone = "Europe/Berlin";
 
@@ -86,6 +90,53 @@ public sealed class AdminTenantSetupController(
         Response.Headers.CacheControl = "no-store";
         return CreatedAtAction(
             nameof(GetOwner),
+            new { tenantSlug = RouteData.Values[TenantProvider.RouteKey] },
+            new CredentialsResponse(result.UserId, result.FirstName, result.LastName, result.Email, result.Password));
+    }
+
+    [HttpGet("seniorities")]
+    [EndpointSummary("List seniority levels for the staff form.")]
+    [ProducesResponseType<List<SeniorityResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<List<SeniorityResponse>>> GetSeniorities(CancellationToken ct)
+    {
+        List<SeniorityItem> items = await getSeniorities.HandleAsync(ct);
+        return Ok(items.Select(s => new SeniorityResponse(s.Id, s.Name, s.Level)).ToList());
+    }
+
+    [HttpGet("staff")]
+    [EndpointSummary("List staff with their login email and phone (never passwords).")]
+    [ProducesResponseType<List<StaffAccountResponse>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<List<StaffAccountResponse>>> GetStaff(CancellationToken ct)
+    {
+        List<StaffAccountItem> items = await getStaff.HandleAsync(ct);
+        return Ok(items
+            .Select(s => new StaffAccountResponse(
+                s.Id, s.UserId, s.FirstName, s.LastName, s.Email, s.Phone, s.Seniority, s.IsActive))
+            .ToList());
+    }
+
+    [HttpPost("staff")]
+    [EndpointSummary("Create a barber login and staff record. The generated password is only in this response.")]
+    [ProducesResponseType<CredentialsResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<CredentialsResponse>> CreateStaff(CreateBarberRequest request, CancellationToken ct)
+    {
+        CreateBarberAccountCommand command = new(
+            request.FirstName.Trim(),
+            request.LastName.Trim(),
+            request.Email.Trim(),
+            request.Phone.Trim(),
+            request.SeniorityId);
+        await barberValidator.ValidateAndThrowAsync(command, ct);
+        CredentialsResult result = await createBarber.HandleAsync(command, ct);
+        Response.Headers.CacheControl = "no-store";
+        return CreatedAtAction(
+            nameof(GetStaff),
             new { tenantSlug = RouteData.Values[TenantProvider.RouteKey] },
             new CredentialsResponse(result.UserId, result.FirstName, result.LastName, result.Email, result.Password));
     }

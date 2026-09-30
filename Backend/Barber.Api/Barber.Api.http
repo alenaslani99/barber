@@ -159,3 +159,18 @@ Content-Type: application/json
 ### Admin: get owner (no password)
 GET http://localhost:5118/api/admin/tenants/acme/owner
 X-Admin-Key: dev-admin-key-not-for-production
+
+### Admin: seniority levels for the staff form
+GET http://localhost:5118/api/admin/tenants/acme/seniorities
+X-Admin-Key: dev-admin-key-not-for-production
+
+### Admin: list staff
+GET http://localhost:5118/api/admin/tenants/acme/staff
+X-Admin-Key: dev-admin-key-not-for-production
+
+### Admin: create barber (login + staff record; password is only in this response)
+POST http://localhost:5118/api/admin/tenants/acme/staff
+X-Admin-Key: dev-admin-key-not-for-production
+Content-Type: application/json
+
+{"firstName":"Luka","lastName":"Horvat","email":"luka@acme.shop","phone":"+491707654321","seniorityId":"33333333-3333-3333-3333-333333333333"}

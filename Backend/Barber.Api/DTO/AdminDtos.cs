@@ -20,6 +20,17 @@ public sealed record ShopDetailsResponse(
 public sealed record CreateOwnerRequest(string FirstName, string LastName, string Email, string Phone);
 public sealed record OwnerResponse(Guid Id, string FirstName, string LastName, string Email, string Phone);
 public sealed record CredentialsResponse(Guid UserId, string FirstName, string LastName, string Email, string Password);
+public sealed record SeniorityResponse(Guid Id, string Name, int Level);
+public sealed record CreateBarberRequest(string FirstName, string LastName, string Email, string Phone, Guid? SeniorityId);
+public sealed record StaffAccountResponse(
+    Guid Id,
+    Guid UserId,
+    string FirstName,
+    string LastName,
+    string Email,
+    string Phone,
+    string Seniority,
+    bool IsActive);
 public sealed record TenantSetupResponse(
     TenantResponse Tenant,
     bool HasShop,

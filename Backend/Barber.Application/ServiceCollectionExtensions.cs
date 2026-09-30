@@ -40,6 +40,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<UpsertShopHandler>();
         services.AddScoped<GetOwnerHandler>();
         services.AddScoped<CreateOwnerHandler>();
+        services.AddScoped<GetSenioritiesHandler>();
+        services.AddScoped<GetStaffAccountsHandler>();
+        services.AddScoped<CreateBarberAccountHandler>();
         services.AddScoped<AuditWriter>();
         services.AddValidatorsFromAssemblyContaining<RegisterUserValidator>();
         return services;

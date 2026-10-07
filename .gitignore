@@ -22,7 +22,9 @@ Thumbs.db
 
 #AI
 .opencode/
-.opencode/
+.claude/
+.agents/
 
 # Local-only docs
 SECURITY.md
+TODO*.md

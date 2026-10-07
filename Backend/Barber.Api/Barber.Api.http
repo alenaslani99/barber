@@ -118,7 +118,7 @@ Content-Type: application/json
 ### Create staff (Owner only)
 POST https://localhost:7145/api/staff
 X-Tenant-Slug: demo
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMjRkN2FiYS0wZmYyLTRlMzgtODY2Mi05OWEwZDk5ZDU0OWYiLCJlbWFpbCI6Im93bmVyQGRlbW8uc2hvcCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6Ik93bmVyIiwidGVuYW50IjoiZGVtbyIsImV4cCI6MTc4OTE0NTk2NiwiaXNzIjoiYmFyYmVyLWFwaSIsImF1ZCI6ImJhcmJlci1jbGllbnRzIn0.ZH3LaacGL4he-aDr7Q1DJM5fl-QEs4mkDaPHfkbneKM
+Authorization: Bearer <access-token>
 Content-Type: application/json
 
 {"email":"staff@demo.shop","barbershopId":"73f1e611-9f30-48d2-8ce6-531610f6f676","seniorityId":"22222222-2222-2222-2222-222222222222"}
